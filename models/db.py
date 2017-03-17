@@ -130,3 +130,28 @@ auth.settings.reset_password_requires_verification = True
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
+
+db.define_table('user_info',
+    Field('name','string'),
+    Field('date_added','datetime'))
+
+db.define_table('discussion', 
+    Field('title', 'string'),
+    Field('description', 'string'),
+    Field('page_num', 'integer'),
+    Field('added_by','reference user_info'),
+    Field('date_added','datetime'))
+
+db.define_table('discussion_message',
+    Field('discussion', 'reference discussion'),
+    Field('message_content','string'),
+    Field('date_added','datetime'),
+    Field('added_by','reference user_info'))
+
+db.define_table('concept',
+    Field('name','string'),
+    Field('related_pages','list:integer'))
+
+db.define_table('concept_discussion',
+    Field('concept','reference concept'),
+    Field('discussion','reference discussion'))
