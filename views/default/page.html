@@ -2,7 +2,75 @@
 <html>
 <head>
 	<title>Q and A</title>
+
 	<link rel="stylesheet" type="text/css" href="{{=URL('static','css/style.css')}}"/>
+
+    <script src="{{=URL('static','js/jquery.js')}}"></script>
+    <script>
+        var URL = {
+            submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}'
+        },
+        ENV = {
+            pageNum: '{{=page_num}}'
+        }
+
+        $(function(){
+            // Attach click handlers
+            $('#discussionStartBtn').on('click', function(){
+                openOverlay('#addDiscussionPopup');
+            });
+
+            $('.close').click(function(){
+                closeOverlay();
+            });
+
+            $('#overlay').click(function(e){
+                if($(e.target).is('#overlay')){
+                    closeOverlay();
+                }
+            });
+
+            $('#addDiscussionPopup .submit').click(function(){
+                submitDiscussion();
+            });
+        });
+
+        function openOverlay(id){
+            var overlay = $('#overlay');
+            overlay.show('slow');
+            $(id, overlay).show('slow');
+        }
+
+        function closeOverlay(){
+            var overlay = $('#overlay');
+            overlay.hide('slow');
+            $('.popup', overlay).hide('slow');
+        }
+
+        function submitDiscussion(){
+            // Get data
+            var popup = $('#addDiscussionPopup');
+            // Submit discussion
+            var data = {
+                title: $('[name=title]',popup).val(),
+                description: $('[name=description]',popup).val(),
+                page_num: ENV.pageNum
+            };
+            // Submit
+            $.ajax({
+               url: URL.submitNewDiscussion,
+               method: 'POST',
+               data: data,
+               success: function(data){
+                   var id = data;
+                   window.location.href = "{{=URL('default','discussion')}}?id=" + id;
+               }, error: function(data){
+                   alert(data.responseText);
+               }
+            });
+        }
+
+    </script>
 </head>
 <body>
 <header>
@@ -29,7 +97,7 @@
 
 <h2>
 	Discussions for page {{=page_num}}
-	<a class="button specialButton" href="#" >Start a discussion (+15 points)</a>
+	<a id="discussionStartBtn" class="button specialButton" href="#" >Start a discussion (+15 points)</a>
 </h2>
 
 {{if len(discussions) > 0:}}
@@ -42,7 +110,7 @@
 		<p class="timeStamp">Asked by {{=d.user_info.name}} | {{=d.discussion.date_added}}</p>
 	</li>
     {{pass}}
-</div>
+</ul>
 {{else:}}
 <div class="questionsPanel">
 	<p>
@@ -50,6 +118,29 @@
 	</p>
 </div>
 {{pass}}
-	
+
+<div id="overlay">
+
+    <div id="addDiscussionPopup" class="popup">
+        <div class="close">
+            <img src="{{=URL('static','images/close.png')}}" alt="">
+        </div>
+
+        <h2>Add a new discussion</h2>
+
+        <p>
+            <h3>Title</h3>
+            <input type="text" name="title" placeholder="Suggest a title for your discussion"/>
+        </p>
+
+        <p>
+            <h3>Description</h3>
+            <textarea name="description" placeholder="Enter a longer description of your discussion"></textarea>
+        </p>
+
+        <a href="#" class="button submit">Submit discussion</a>
+    </div>
+
 </div>
+
 </body>

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import json
 import random
+from datetime import datetime
 
 def page():
     page_num = request.vars.page_num
@@ -17,6 +19,39 @@ def page():
     concepts = db(db.concept.related_pages.contains(page_num)).select()
     # Return values
     return dict(page_num=page_num, discussions=discussions, concepts=concepts)
+
+def submit_new_discussion():
+    # get data
+    title = request.vars.title
+    description = request.vars.description
+    date_added = datetime.now()
+    page_num = request.vars.page_num
+    added_by = 1 # TODO Figure out how we're handling users
+    # Validate TODO fancier validation, also at client side
+    if not title or not description:
+        response.status = 500
+        return 'All fields are mandatory!'
+    # Insert discussion
+    discussion_id = db.discussion.insert(
+        title = title,
+        description = description,
+        page_num = page_num,
+        added_by = added_by,
+        date_added = date_added
+    )
+    return json.dumps(discussion_id)
+
+def discussion():
+    id = request.vars.id
+    # Validating params
+    if not id:
+        # Mandatory param was not found
+        response.status = 500
+        return 'You must supply a id param'
+
+    # TODO retrieve messages for discussion
+    return dict()
+
 
 def add_concepts():
     concepts = ['another','tree','extinction','bird','observer']

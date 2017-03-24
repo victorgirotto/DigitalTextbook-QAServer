@@ -18,6 +18,21 @@ header {
     border-bottom: solid 1px #CCC;
 }
 
+input,
+textarea {
+    font-size: 1em;
+    border: solid 1px #CCC;
+}
+
+input[type=text] {
+    width: 93%;
+}
+
+textarea {
+    width: 96%;
+    height: 150px;
+}
+
 header .name {
 	line-height: 30px;
 }
@@ -57,12 +72,15 @@ header .userImage {
 h2 {
 	margin: 10px 15px 10px 15px;
 	font-size: 1.4em;
-	line-height: 2em;
     letter-spacing: -1px;
 }
 
-h2 > a {
-	float: right;
+    h2 > a {
+        float: right;
+    }
+
+h3 {
+    font-size: 1em;
 }
 
 .linkList {
@@ -87,12 +105,14 @@ h2 > a {
 	font-size: 16px;
 	line-height: 16px;
 	font-weight: normal;
-    border: solid 1px #1D62F0;
+    border: solid 1px #CCC;
+    box-shadow: inset 0 -3px 5px rgba(0,0,0,0.1);
 }
 
 .button.specialButton {
 	background-color: #007AFF;
 	color: white;
+    border: solid 1px #1D62F0;
 }
 
 .button.contributeButton {
@@ -326,4 +346,44 @@ h2 > a {
     text-decoration: none;
     border-radius: 20px;
     margin-top: 10px;
+}
+
+#overlay {
+    display: none;
+    background: rgba(255,255,255,0.7);
+    z-index: 9999;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#overlay .popup {
+    position: relative;
+    margin: 20px auto;
+    width: 400px;
+    background: white;
+    border: solid 1px #CCC;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    padding: 10px 20px 20px 20px;
+    overflow: auto;
+}
+
+#overlay .popup .close {
+    position: absolute;
+    height: 32px;
+    width: 32px;
+    top: 10px;
+    right: 10px;
+}
+
+#overlay .popup h2,
+#overlay .popup h3 {
+    margin: 0;
+}
+
+.submit {
+    float: right;
 }
