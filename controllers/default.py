@@ -48,8 +48,8 @@ def discussion():
         response.status = 500
         return 'You must supply a id param'
 
-    # TODO retrieve messages for discussion
-    return dict(user_name='Test user', contribution_points=21)
+    # TODO retrieve messages for discussion, return correct page_num
+    return dict(user_name='Test user', contribution_points=21, page_num=1)
 
 def __insert_concept(name, page):
     db.concept.insert(name=name,related_pages=[page], color=__random_color())

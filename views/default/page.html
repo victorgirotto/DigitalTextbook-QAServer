@@ -28,6 +28,11 @@
         $('#addDiscussionPopup .submit').click(function(){
             submitDiscussion();
         });
+
+        $('.questionLink').click(function(){
+            var id = $(this).data('id');
+            window.location.href = "{{=URL('default','discussion')}}?id=" + id;
+        });
     });
 
     function openOverlay(id){
@@ -87,7 +92,7 @@
 {{if len(discussions) > 0:}}
 <ul class="questionsList"> 
     {{for d in discussions:}}
-	<li class="questionLink">
+	<li class="questionLink" data-id="{{=d.discussion.id}}">
 		<p class="question"> {{=d.discussion.title}} 
 			<img class="arrow" src="{{=URL('static','images/arrow.png')}}" alt="Question Arrow">
 		</p>

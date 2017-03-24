@@ -37,6 +37,17 @@ header .name {
 	line-height: 30px;
 }
 
+a {
+    color: #007AFF;
+    text-decoration: none;
+}
+
+#back {
+    font-size: 1.2em;
+    display: inline-block;
+    padding: 10px;
+}
+
 .userStats {
 	line-height: 30px;
 	position: absolute;

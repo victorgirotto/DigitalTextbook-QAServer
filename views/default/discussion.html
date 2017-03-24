@@ -1,5 +1,18 @@
 {{extend 'layout.html'}}
 
+{{block header_script}}
+	<script>
+		$(function(){
+			// Attach event handlers
+			$('#back').click(function(){
+				window.location.href = "{{=URL('default','page')}}?page_num={{=page_num}}";
+			})
+		});
+	</script>
+{{end}}
+
+<a href="#" id="back">< Back</a>
+
 <h2>According to the author, why do mass extinctions happen?</h2>
 
 <div class="chatHistory">
