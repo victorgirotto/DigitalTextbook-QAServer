@@ -1,0 +1,55 @@
+<!DOCTYPE html>	
+<html>
+<head>
+	<title>Q and A</title>
+	<link rel="stylesheet" type="text/css" href="{{=URL('static','css/style.css')}}"/>
+</head>
+<body>
+<header>
+	<h2>
+        <img class="userImage" src="{{=URL('static','images/user.png')}}" alt="">
+        John Doe
+    </h2>
+	<p class="userStats">
+		Contribution points <span>91</span>
+	</p>
+</header>
+
+<h2>Main concepts in page {{=page_num}}</h2>
+
+<ul class="linkList divisor">
+    {{if len(concepts) > 0:}}
+        {{for c in concepts:}}
+            <li><a class="tag" href="#" style="background: {{=c.color}};">{{=c.name}}</a></li>
+        {{pass}}
+    {{else:}}
+        <li>No concepts exist for this page.</li>
+    {{pass}}
+</ul>
+
+<h2>
+	Discussions for page {{=page_num}}
+	<a class="button specialButton" href="#" >Start a discussion (+15 points)</a>
+</h2>
+
+{{if len(discussions) > 0:}}
+<ul class="questionsList"> 
+    {{for d in discussions:}}
+	<li class="questionLink">
+		<p class="question"> {{=d.discussion.title}} 
+			<img class="arrow" src="{{=URL('static','images/arrow.png')}}" alt="Question Arrow">
+		</p>
+		<p class="timeStamp">Asked by {{=d.user_info.name}} | {{=d.discussion.date_added}}</p>
+	</li>
+    {{pass}}
+</div>
+{{else:}}
+<div class="questionsPanel">
+	<p>
+		There are no questions yet for this page. Why not start one? :)
+	</p>
+</div>
+{{pass}}
+	
+</div>
+</body>

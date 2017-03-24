@@ -150,7 +150,8 @@ db.define_table('discussion_message',
 
 db.define_table('concept',
     Field('name','string'),
-    Field('related_pages','list:integer'))
+    Field('related_pages','list:integer'),
+    Field('color','string'))
 
 db.define_table('concept_discussion',
     Field('concept','reference concept'),

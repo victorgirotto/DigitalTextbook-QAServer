@@ -1,75 +1,48 @@
 # -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
+import random
 
-# -------------------------------------------------------------------------
-# This is a sample controller
-# - index is the default action of any application
-# - user is required for authentication and authorization
-# - download is for downloading files uploaded in the db (does streaming)
-# -------------------------------------------------------------------------
+def page():
+    page_num = request.vars.page_num
+    # Validating params
+    if not page_num:
+        # Mandatory param was not found
+        response.status = 500
+        return 'You must supply a page_num param'
 
+    # Retrieve discussions for page page_num
+    discussions = db(
+        (db.discussion.page_num == page_num) &
+        (db.discussion.added_by == db.user_info.id)).select(groupby=db.discussion.id)
+    # Retrieve concepts that exist in page
+    concepts = db(db.concept.related_pages.contains(page_num)).select()
+    # Return values
+    return dict(page_num=page_num, discussions=discussions, concepts=concepts)
 
-def api():
-    def GET(*args, **vars):
-        return dict()
+def add_concepts():
+    concepts = ['another','tree','extinction','bird','observer']
+    for c in concepts:
+        __insert_concept(c,1)
 
-    def POST(*args, **vars):
-        return dict()
+def __insert_concept(name, page):
+    db.concept.insert(name=name,related_pages=[page], color=__random_color())
 
-    def PUT(*args, **vars):
-        return dict()
-
-    def DELETE(*args, **vars):
-        return dict()
-
-
-def index():
-    """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
-
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
-    """
-    response.flash = T("Hello World")
-    return dict(message=T('Welcome to web2py!'))
-
-
-def user():
-    """
-    exposes:
-    http://..../[app]/default/user/login
-    http://..../[app]/default/user/logout
-    http://..../[app]/default/user/register
-    http://..../[app]/default/user/profile
-    http://..../[app]/default/user/retrieve_password
-    http://..../[app]/default/user/change_password
-    http://..../[app]/default/user/bulk_register
-    use @auth.requires_login()
-        @auth.requires_membership('group name')
-        @auth.requires_permission('read','table name',record_id)
-    to decorate functions that need access control
-    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users
-    """
-    return dict(form=auth())
-
-
-@cache.action()
-def download():
-    """
-    allows downloading of uploaded files
-    http://..../[app]/default/download/[filename]
-    """
-    return response.download(request, db)
-
-
-def call():
-    """
-    exposes services. for example:
-    http://..../[app]/default/call/jsonrpc
-    decorate with @services.jsonrpc the functions to expose
-    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
-    """
-    return service()
-
-
+def __random_color():
+    colors = [
+        "#F49AC2",
+        "#CB99C9",
+        "#C23B22",
+        "#FFD1DC",
+        "#DEA5A4",
+        "#AEC6CF",
+        "#77DD77",
+        "#CFCFC4",
+        "#B39EB5",
+        "#FFB347",
+        "#B19CD9",
+        "#FF6961",
+        "#03C03C",
+        "#FDFD96",
+        "#836953",
+        "#779ECB",
+        "#966FD6"]
+    return random.choice(colors)

@@ -1,0 +1,41 @@
+<html>
+    <head>
+
+        <script src="{{=URL('static','js/jquery.js')}}"></script>
+        <script src="?page_num=1"></script>
+
+        <script>
+            $(function(){
+
+                $.ajax({
+                    "url": "../discussion/page",
+                    "method": "GET",
+                    "data": {
+                        "page_num": 1
+                    },
+                    "success": function(data){
+                        
+                        data.forEach(function(d,i){
+                            var li = $("<li></li>").text(d.title);
+                            $("ul").append(li);
+                        });
+
+                    },
+                    "error": function(data){
+                        alert('Error!');
+                    }
+                });
+
+            });
+        </script>
+    </head>
+    <body>
+
+    {{=name}}
+
+    <ul>
+        
+    </ul>
+
+    </body>
+</html>
