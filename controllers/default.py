@@ -10,7 +10,6 @@ def page():
         # Mandatory param was not found
         response.status = 500
         return 'You must supply a page_num param'
-
     # Retrieve discussions for page page_num
     discussions = db(
         (db.discussion.page_num == page_num) &
@@ -18,7 +17,7 @@ def page():
     # Retrieve concepts that exist in page
     concepts = db(db.concept.related_pages.contains(page_num)).select()
     # Return values
-    return dict(page_num=page_num, discussions=discussions, concepts=concepts)
+    return dict(page_num=page_num, discussions=discussions, concepts=concepts, user_name='Test user', contribution_points=21)
 
 def submit_new_discussion():
     # get data
@@ -50,13 +49,7 @@ def discussion():
         return 'You must supply a id param'
 
     # TODO retrieve messages for discussion
-    return dict()
-
-
-def add_concepts():
-    concepts = ['another','tree','extinction','bird','observer']
-    for c in concepts:
-        __insert_concept(c,1)
+    return dict(user_name='Test user', contribution_points=21)
 
 def __insert_concept(name, page):
     db.concept.insert(name=name,related_pages=[page], color=__random_color())

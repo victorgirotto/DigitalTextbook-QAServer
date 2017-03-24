@@ -1,87 +1,71 @@
-<!DOCTYPE html>	
-<html>
-<head>
-	<title>Q and A</title>
+{{extend 'layout.html'}}
 
-	<link rel="stylesheet" type="text/css" href="{{=URL('static','css/style.css')}}"/>
+{{block header_script}}
+<script>
+    var URL = {
+        submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}'
+    },
+    ENV = {
+        pageNum: '{{=page_num}}'
+    }
 
-    <script src="{{=URL('static','js/jquery.js')}}"></script>
-    <script>
-        var URL = {
-            submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}'
-        },
-        ENV = {
-            pageNum: '{{=page_num}}'
-        }
-
-        $(function(){
-            // Attach click handlers
-            $('#discussionStartBtn').on('click', function(){
-                openOverlay('#addDiscussionPopup');
-            });
-
-            $('.close').click(function(){
-                closeOverlay();
-            });
-
-            $('#overlay').click(function(e){
-                if($(e.target).is('#overlay')){
-                    closeOverlay();
-                }
-            });
-
-            $('#addDiscussionPopup .submit').click(function(){
-                submitDiscussion();
-            });
+    $(function(){
+        // Attach click handlers
+        $('#discussionStartBtn').on('click', function(){
+            openOverlay('#addDiscussionPopup');
         });
 
-        function openOverlay(id){
-            var overlay = $('#overlay');
-            overlay.show('slow');
-            $(id, overlay).show('slow');
-        }
+        $('.close').click(function(){
+            closeOverlay();
+        });
 
-        function closeOverlay(){
-            var overlay = $('#overlay');
-            overlay.hide('slow');
-            $('.popup', overlay).hide('slow');
-        }
+        $('#overlay').click(function(e){
+            if($(e.target).is('#overlay')){
+                closeOverlay();
+            }
+        });
 
-        function submitDiscussion(){
-            // Get data
-            var popup = $('#addDiscussionPopup');
-            // Submit discussion
-            var data = {
-                title: $('[name=title]',popup).val(),
-                description: $('[name=description]',popup).val(),
-                page_num: ENV.pageNum
-            };
-            // Submit
-            $.ajax({
-               url: URL.submitNewDiscussion,
-               method: 'POST',
-               data: data,
-               success: function(data){
-                   var id = data;
-                   window.location.href = "{{=URL('default','discussion')}}?id=" + id;
-               }, error: function(data){
-                   alert(data.responseText);
-               }
-            });
-        }
+        $('#addDiscussionPopup .submit').click(function(){
+            submitDiscussion();
+        });
+    });
 
-    </script>
-</head>
-<body>
-<header>
-	<h2>
-        <img class="userImage" src="{{=URL('static','images/user.png')}}" alt="">
-        John Doe
-    </h2>
-	<p class="userStats">
-		Contribution points <span>91</span>
-	</p>
-</header>
+    function openOverlay(id){
+        var overlay = $('#overlay');
+        overlay.show('slow');
+        $(id, overlay).show('slow');
+    }
+
+    function closeOverlay(){
+        var overlay = $('#overlay');
+        overlay.hide('slow');
+        $('.popup', overlay).hide('slow');
+    }
+
+    function submitDiscussion(){
+        // Get data
+        var popup = $('#addDiscussionPopup');
+        // Submit discussion
+        var data = {
+            title: $('[name=title]',popup).val(),
+            description: $('[name=description]',popup).val(),
+            page_num: ENV.pageNum
+        };
+        // Submit
+        $.ajax({
+            url: URL.submitNewDiscussion,
+            method: 'POST',
+            data: data,
+            success: function(data){
+                var id = data;
+                window.location.href = "{{=URL('default','discussion')}}?id=" + id;
+            }, error: function(data){
+                alert(data.responseText);
+            }
+        });
+    }
+</script>
+{{end}}
 
 <h2>Main concepts in page {{=page_num}}</h2>
 
@@ -120,7 +104,6 @@
 {{pass}}
 
 <div id="overlay">
-
     <div id="addDiscussionPopup" class="popup">
         <div class="close">
             <img src="{{=URL('static','images/close.png')}}" alt="">
@@ -142,5 +125,3 @@
     </div>
 
 </div>
-
-</body>
