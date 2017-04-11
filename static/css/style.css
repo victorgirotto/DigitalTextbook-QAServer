@@ -178,8 +178,10 @@ h3 {
 }
 
 .timeStamp.user {
+	display:inline-block;
 	float:right;
-	margin-right: 15px;
+	margin-right: 0px;
+	color: #1D90FF;
 }
 
 .questionsPanel {
@@ -195,9 +197,9 @@ h3 {
 .chatMessage {
 	margin-top: 10px;
 	position: relative;
-	width: 60%;
 	background: #CCC;
 	padding: 25px 18px 25px 18px;
+	width: 100%;
 	color:black;
 	border-radius:10px;
 	border-color: black;
@@ -216,10 +218,10 @@ h3 {
 }
 .userMessage {
 	margin-top: 10px;
-	margin-left: 50px;
+	margin-right: 15px;
 	position: relative;
-	width: 60%;
-	background: #CCC;
+	width: 100%;
+	background: #ACD8E6;
 	padding: 25px 18px 25px 18px;
 	color:black;
 	border-radius:10px;
@@ -233,7 +235,7 @@ h3 {
 	right: 30px;
 	border-width: 15px 15px 0;
 	border-style: solid;
-	border-color: #CCC transparent;
+	border-color: #ACD8E6 transparent;
 	display: block;
 	width: 0;
 }
