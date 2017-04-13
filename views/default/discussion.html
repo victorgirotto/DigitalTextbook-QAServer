@@ -13,23 +13,22 @@
 
 <a href="#" id="back">< Back</a>
 <h2>{{=discussion.title}}</h2>
+<p class= "description">{{=discussion.description}}</p>
 
 {{if len(discussion_messages) > 0:}}
 
 <div class="chatHistory">
 	{{for dm in discussion_messages:}}
-		{{if dm.discussion_message.added_by == current_user_id:}}
-			<div class="chatPanel">
-				<p class="userMessage">{{=dm.discussion_message.message_content}}</p>
+		<div class="chatPanel">
+			{{if dm.discussion_message.added_by == current_user_id:}}
+				<p class="chatMessage user">{{=dm.discussion_message.message_content}}</p>
 				<p class="timeStamp user">Me | {{=dm.discussion_message.date_added}}</p>
-			</div>
-			{{pass}}
-		{{else:}}
-			<div class="chatPanel">
+			{{else:}}
 				<p class="chatMessage">{{=dm.discussion_message.message_content}}</p>
 				<p class="timeStamp">{{=dm.user_info.name}} | {{=dm.discussion_message.date_added}}</p>
-			</div>
-		{{pass}}
+			{{pass}}	
+		</div>
+	{{pass}}
 </div>
 {{pass}}
 
