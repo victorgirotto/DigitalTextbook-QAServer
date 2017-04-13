@@ -165,10 +165,10 @@ h3 {
     height: 30px;
 }
 
-    .arrow img {
-        width: 40px;
-        height: 40px;
-    }
+.arrow img {
+    width: 40px;
+    height: 40px;
+}
 
 .timeStamp {
 	margin-top: 5px;
@@ -178,8 +178,10 @@ h3 {
 }
 
 .timeStamp.user {
+	display:inline-block;
 	float:right;
-	margin-right: 15px;
+	margin-right: 0px;
+	color: #1D90FF;
 }
 
 .questionsPanel {
@@ -193,14 +195,20 @@ h3 {
 }
 
 .chatMessage {
+	display: inline-block;
 	margin-top: 10px;
-	position: relative;
-	width: 60%;
 	background: #CCC;
+	position: relative;
 	padding: 25px 18px 25px 18px;
+	width: 100%;
+	box-sizing: border-box;
 	color:black;
 	border-radius:10px;
 	border-color: black;
+}
+
+.chatMessage.user {
+	background: #ACD8E6;
 }
 
 .chatMessage:after {
@@ -214,45 +222,14 @@ h3 {
 	display: block;
 	width: 0;
 }
-.userMessage {
-	margin-top: 10px;
-	margin-left: 50px;
-	position: relative;
-	width: 60%;
-	background: #CCC;
-	padding: 25px 18px 25px 18px;
-	color:black;
-	border-radius:10px;
-	border-color: black;
-}
 
-.userMessage:after {
-	content: "";
-	position: absolute;
-	bottom: -15px;
+.chatMessage.user:after {
 	right: 30px;
-	border-width: 15px 15px 0;
-	border-style: solid;
-	border-color: #CCC transparent;
-	display: block;
-	width: 0;
-}
-
-.chatPanel {
-	margin-top: 10px;
-	margin-left: 15px;
-}
-
-.chatPanel > div {
-	display: inline-block;
-}
-
-.chatPanel > p:first-of-type {
-	display: inline-block;
+	border-color: #ACD8E6 transparent;
 }
 
 .chatHistory {
-	padding-bottom: 80px;
+	padding: 0px 20px;
 }
 
 .contributePanel {
@@ -397,4 +374,8 @@ h3 {
 
 .submit {
     float: right;
+}
+
+.description {
+	margin-left: 15px;
 }

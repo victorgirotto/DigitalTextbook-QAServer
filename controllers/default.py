@@ -3,6 +3,8 @@ import json
 import random
 from datetime import datetime
 
+session.user_id = 1
+
 def page():
     page_num = request.vars.page_num
     # Validating params
@@ -47,9 +49,15 @@ def discussion():
         # Mandatory param was not found
         response.status = 500
         return 'You must supply a id param'
-
+    # Retrieve discussion messages
+    discussion_messages = db(
+        (db.discussion_message.discussion == id) & 
+        (db.discussion_message.added_by == db.user_info.id)).select()
+    # Retrieve discussion
+    discussion = db((db.discussion.id == id)).select().first()
+    current_user_id = session.user_id
     # TODO retrieve messages for discussion, return correct page_num
-    return dict(user_name='Test user', contribution_points=21, page_num=1)
+    return dict(user_name='Test user', current_user_id=current_user_id, discussion=discussion, discussion_messages=discussion_messages, contribution_points=21, page_num=1)
 
 def __insert_concept(name, page):
     db.concept.insert(name=name,related_pages=[page], color=__random_color())

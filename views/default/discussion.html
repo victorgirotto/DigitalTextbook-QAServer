@@ -12,45 +12,25 @@
 {{end}}
 
 <a href="#" id="back">< Back</a>
+<h2>{{=discussion.title}}</h2>
+<p class= "description">{{=discussion.description}}</p>
 
-<h2>According to the author, why do mass extinctions happen?</h2>
+{{if len(discussion_messages) > 0:}}
 
 <div class="chatHistory">
-	<div class="chatPanel">
-		<p class="chatMessage">I believe that on page 3, the author clearly states that extinctions happen for three reasons.</p>
-		<div class="contributePanel">
-			<img class="centerBadge answerBadge" src="orange triangle.png" alt="Caution Triangle" height="50" width="50">
-			<a class="button contributeButton" href="#" >Contribute</a>
+	{{for dm in discussion_messages:}}
+		<div class="chatPanel">
+			{{if dm.discussion_message.added_by == current_user_id:}}
+				<p class="chatMessage user">{{=dm.discussion_message.message_content}}</p>
+				<p class="timeStamp user">Me | {{=dm.discussion_message.date_added}}</p>
+			{{else:}}
+				<p class="chatMessage">{{=dm.discussion_message.message_content}}</p>
+				<p class="timeStamp">{{=dm.user_info.name}} | {{=dm.discussion_message.date_added}}</p>
+			{{pass}}	
 		</div>
-		<p class="timeStamp">Anthony Stark | 2 hours ago</p>
-	</div>
-
-	<div class="chatPanel">
-		<p class="chatMessage">I thought there were only 2.</p>
-		<div class="contributePanel">
-			<img class="answerBadge" src="green check mark.png" alt="Green Check Mark" height="50" width="50">
-			<img class="answerBadge" src="three orange dots.png" alt="Three Dots" height="50" width="50">
-			<a class="button contributeButton" href="#" >Contribute</a>
-		</div>
-		<p class="timeStamp">Steve Rodgers | 15 minutes ago</p>
-	</div>
-
-	<div class="chatPanel">
-		<p class="chatMessage">Because the author is being sarcastic.</p>
-		<div class="contributePanel">
-			<a class="noBadge button contributeButton" href="#" >Contribute</a>
-		</div>
-		<p class="timeStamp">Steve Rodgers | 14 minutes ago</p>
-	</div>
-
-	<div class="chatPanel">
-		<div class="noContribute">
-			<img class="centerBadge answerBadge" src="green check mark.png" alt="Green Check Mark" height="50" width="50">
-		</div>
-		<p class="userMessage">Steve is right. The third reason, lack of flossing, was just a joke by the author.</p>
-		<p class="timeStamp user">Me | Now</p>
-	</div>
+	{{pass}}
 </div>
+{{pass}}
 
 <div class="replyPanel">
 		<input class = "replyBox" type="text" value="Enter a reply here" size="70"/>
