@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import random
+import re
 from datetime import datetime
 
 def login():
@@ -52,6 +53,11 @@ def submit_new_discussion():
     date_added = datetime.now()
     page_num = request.vars.page_num
     added_by = session.user_id
+    # Deal with hashtags
+    concepts = re.findall(r"#(\w+)", description)
+    ids = []
+    for c in concepts:
+        ids.append(__insert_concept(c, page_num))
     # Validate TODO fancier validation, also at client side
     if not title or not description or not kind:
         response.status = 500
@@ -65,6 +71,12 @@ def submit_new_discussion():
         added_by = added_by,
         date_added = date_added
     )
+    # Connect concept and discussion
+    for i in ids:
+        db.concept_discussion.insert(
+            concept = i,
+            discussion = discussion_id
+        )
     return json.dumps(discussion_id)
 
 def discussion():
@@ -110,7 +122,18 @@ def __check_username():
         redirect(URL(request.application, 'default', 'login'))
 
 def __insert_concept(name, page):
-    db.concept.insert(name=name,related_pages=[page], color=__random_color())
+    concept = db(db.concept.name == name).select().first()
+    if not concept:
+        # This is a new concept
+        id = db.concept.insert(name=name,related_pages=[page], color=__random_color())
+        return id
+    else:
+        print(concept.related_pages)
+        # Concept exists. Simply add a reference to this page
+        if not long(page) in concept.related_pages:
+            concept.related_pages.append(page)
+            concept.update_record()
+        return concept.id
 
 def __random_color():
     colors = [

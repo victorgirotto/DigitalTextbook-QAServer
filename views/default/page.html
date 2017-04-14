@@ -1,6 +1,8 @@
 {{extend 'layout.html'}}
 
 {{block header_script}}
+<script src="{{=URL('static', 'js/autosize.min.js')}}"></script>
+<script src="{{=URL('static', 'js/jquery.hashtags.min.js')}}"></script>
 <script>
     var URL = {
         submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}'
@@ -10,6 +12,9 @@
     }
 
     $(function(){
+        // Setup hashtags
+        $('#descriptionTextarea').hashtags();
+
         // Attach click handlers
         $('#discussionStartBtn').on('click', function(){
             openOverlay('#addDiscussionPopup');
@@ -130,7 +135,7 @@
 
         <p>
             <h3>Description</h3>
-            <textarea name="description" placeholder="Enter a longer description of your discussion"></textarea>
+            <textarea id="descriptionTextarea" name="description" placeholder="Enter a longer description of your discussion"></textarea>
         </p>
 
         <a href="#" class="button submit">Submit discussion</a>
