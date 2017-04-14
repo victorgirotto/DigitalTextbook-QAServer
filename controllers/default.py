@@ -54,7 +54,7 @@ def submit_new_discussion():
     page_num = request.vars.page_num
     added_by = session.user_id
     # Deal with hashtags
-    concepts = re.findall(r"#(\w+)", description)
+    concepts = re.findall(r"#(\w+)", description) # From http://stackoverflow.com/questions/2527892/parsing-a-tweet-to-extract-hashtags-into-an-array-in-python
     ids = []
     for c in concepts:
         ids.append(__insert_concept(c, page_num))
