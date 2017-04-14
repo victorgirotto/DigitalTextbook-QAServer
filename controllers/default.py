@@ -95,7 +95,7 @@ def discussion():
     discussion = db((db.discussion.id == id)).select().first()
     current_user_id = session.user_id
     # TODO retrieve messages for discussion, return correct page_num
-    return dict(discussion_id=id, user_name='Test user', current_user_id=current_user_id, discussion=discussion, discussion_messages=discussion_messages, contribution_points=21, page_num=1)
+    return dict(discussion_id=id, user_name='Test user', current_user_id=current_user_id, discussion=discussion, discussion_messages=discussion_messages, contribution_points=21, page_num=discussion.page_num)
 
 def submit_discussion_reply():
     # get vars
