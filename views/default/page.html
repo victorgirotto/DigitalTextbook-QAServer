@@ -5,7 +5,8 @@
 <script src="{{=URL('static', 'js/jquery.hashtags.min.js')}}"></script>
 <script>
     var URL = {
-        submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}'
+        submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}',
+        getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}'
     },
     ENV = {
         pageNum: '{{=page_num}}'
@@ -18,6 +19,47 @@
         // Attach click handlers
         $('#discussionStartBtn').on('click', function(){
             openOverlay('#addDiscussionPopup');
+        });
+
+        $('.tag').click(function(){
+            var tag = $(this).text();
+            var container = $('#tagDiscussionsPopup .questionsList');
+            container.empty();
+            openOverlay(
+                '#tagDiscussionsPopup',
+                function(params){
+                    // Setup title
+                    $('h2 > span').text(tag);
+                    // Retrieve discussions
+                    $.ajax({
+                        url: URL.getDiscussionsForTag,
+                        data: {tag:tag},
+                        success: function(data){
+                            var discussions = JSON.parse(data);
+                            for(var i = 0; i < discussions.length; i++){
+                                var d = discussions[i];
+                                var li = $('<li></li>').attr({
+                                    class: 'questionLink',
+                                    'data-id': d.id
+                                }).click(redirectToDiscussion);
+                                var question = $('<p></p>').attr({
+                                    class: 'question'
+                                }).text(d.title);
+                                var img = $('<img/>').attr({
+                                    class: 'arrow',
+                                    src: "{{=URL('static','images/arrow.png')}}"
+                                });
+                                question.append(img);
+                                var timestamp = $('<p></p>').attr({
+                                    class: 'timeStamp'
+                                }).text(d.added_by + ' | ' + d.date_added); 
+                                li.append(question).append(timestamp);
+                                // Add to DOM
+                                container.append(li);
+                            }
+                        }
+                    })
+                });
         });
 
         $('.close').click(function(){
@@ -34,22 +76,27 @@
             submitDiscussion();
         });
 
-        $('.questionLink').click(function(){
-            var id = $(this).data('id');
-            window.location.href = "{{=URL('default','discussion')}}?id=" + id;
-        });
+        $('.questionLink').click(redirectToDiscussion);
     });
 
-    function openOverlay(id){
+    function redirectToDiscussion(){
+        var id = $(this).data('id');
+        window.location.href = "{{=URL('default','discussion')}}?id=" + id;
+    }
+
+    function openOverlay(id, setupFunction){
         var overlay = $('#overlay');
         overlay.show('slow');
         $(id, overlay).show('slow');
+        if(setupFunction){
+            setupFunction();
+        }
     }
 
     function closeOverlay(){
         var overlay = $('#overlay');
         overlay.hide('slow');
-        $('.popup', overlay).hide('slow');
+        $('.popup').hide('slow');
     }
 
     function submitDiscussion(){
@@ -115,6 +162,17 @@
 {{pass}}
 
 <div id="overlay">
+    <div id="tagDiscussionsPopup" class="popup">
+        <div class="close">
+            <img src="{{=URL('static','images/close.png')}}" alt="">
+        </div>
+
+        <h2>Discussions for tag <span></span></h2>
+
+        <ul class="questionsList"> 
+        </ul>
+    </div>
+
     <div id="addDiscussionPopup" class="popup">
         <div class="close">
             <img src="{{=URL('static','images/close.png')}}" alt="">

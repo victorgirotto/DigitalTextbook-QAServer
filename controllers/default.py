@@ -79,6 +79,20 @@ def submit_new_discussion():
         )
     return json.dumps(discussion_id)
 
+def get_discussions_for_tag():
+    tag = request.vars.tag
+    discussions = db((db.concept_discussion.discussion == db.discussion.id) &
+        (db.concept_discussion.concept == db.concept.id) &
+        (db.discussion.added_by == db.user_info.id) &
+        (db.concept.name == tag)).select(groupby=db.discussion.id)
+    clean_discussions = [dict(
+            id=d.discussion.id,
+            title=d.discussion.title,
+            added_by=d.user_info.name,
+            date_added=str(d.discussion.date_added))
+        for d in discussions]
+    return json.dumps(clean_discussions)
+
 def discussion():
     __check_username()
     id = request.vars.id

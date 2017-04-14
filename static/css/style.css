@@ -356,9 +356,11 @@ h3 {
 }
 
 #overlay .popup {
+	display: none;
     position: relative;
     margin: 20px auto;
     width: 400px;
+	max-height: 90%;
     background: white;
     border: solid 1px #CCC;
     border-radius: 10px;
