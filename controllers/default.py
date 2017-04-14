@@ -3,9 +3,32 @@ import json
 import random
 from datetime import datetime
 
-session.user_id = 1
+def login():
+    username = request.vars['username']
+    if not username:
+        # First loading the page
+        return dict()
+    else:
+        username = username.lower()
+        # Form submitted
+        user = db(db.user_info.name == username).select().first()
+        if not user:
+            # User does not exist. Insert
+            user_id = db.user_info.insert(
+                name = username,
+                date_added = datetime.now()
+            )
+        else:
+            # user exists
+            user_id = user.id
+        # Set session
+        session.user_id = user_id
+        session.user_name = username
+        # Redirect to page
+        redirect(URL(request.application, 'default', 'page?page_num=1'))
 
 def page():
+    __check_username()
     page_num = request.vars.page_num
     # Validating params
     if not page_num:
@@ -19,7 +42,7 @@ def page():
     # Retrieve concepts that exist in page
     concepts = db(db.concept.related_pages.contains(page_num)).select()
     # Return values
-    return dict(page_num=page_num, discussions=discussions, concepts=concepts, user_name='Test user', contribution_points=21)
+    return dict(page_num=page_num, discussions=discussions, concepts=concepts, user_name=session.user_name, contribution_points=21)
 
 def submit_new_discussion():
     # get data
@@ -43,6 +66,7 @@ def submit_new_discussion():
     return json.dumps(discussion_id)
 
 def discussion():
+    __check_username()
     id = request.vars.id
     # Validating params
     if not id:
@@ -78,6 +102,10 @@ def submit_discussion_reply():
         timestamp = str(date_added),
         user_name = reply_id # TODO Should fetch username
     ))
+
+def __check_username():
+    if session.user_id == None:
+        redirect(URL(request.application, 'default', 'login'))
 
 def __insert_concept(name, page):
     db.concept.insert(name=name,related_pages=[page], color=__random_color())
