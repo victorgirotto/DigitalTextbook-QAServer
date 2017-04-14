@@ -57,7 +57,27 @@ def discussion():
     discussion = db((db.discussion.id == id)).select().first()
     current_user_id = session.user_id
     # TODO retrieve messages for discussion, return correct page_num
-    return dict(user_name='Test user', current_user_id=current_user_id, discussion=discussion, discussion_messages=discussion_messages, contribution_points=21, page_num=1)
+    return dict(discussion_id=id, user_name='Test user', current_user_id=current_user_id, discussion=discussion, discussion_messages=discussion_messages, contribution_points=21, page_num=1)
+
+def submit_discussion_reply():
+    # get vars
+    message = request.vars.message
+    discussion_id = request.vars.discussion_id
+    date_added = datetime.now()
+    user_id = session.user_id
+    # Insert in DB
+    reply_id = db.discussion_message.insert(
+        discussion = discussion_id,
+        message_content = message,
+        date_added = date_added,
+        added_by = user_id
+    )
+    return json.dumps(dict(
+        id = reply_id,
+        message = message,
+        timestamp = str(date_added),
+        user_name = reply_id # TODO Should fetch username
+    ))
 
 def __insert_concept(name, page):
     db.concept.insert(name=name,related_pages=[page], color=__random_color())

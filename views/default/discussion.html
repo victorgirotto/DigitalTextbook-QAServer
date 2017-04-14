@@ -2,11 +2,57 @@
 
 {{block header_script}}
 	<script>
+		var URL = {
+        	submitReply: '{{=URL("default","submit_discussion_reply")}}'
+		},
+		ENV = {
+			discussionId: '{{=discussion_id}}'
+		}
+
+
+		var addBuble = function(id, message, timestamp, userName, isCurrentUserMessage){
+			// Create bubble in memory.
+			// Note: this is not a good practice. Ideally we'd use some sort of template engine, e.g. Mustache. But this is faster right now.
+			var container = $('#chatHistory');
+			var chatPanel = $('<div></div>').attr({
+				class: 'chatPanel'
+			});
+			var userPostfix = isCurrentUserMessage ? ' user' : '';
+			var chatMessage = $('<p></p>').attr({
+				class: 'chatMessage' + userPostfix
+			}).text(message);
+			var userName = isCurrentUserMessage ? 'Me' : userName;
+			var timestamp = $('<p></p>').attr({
+				class: 'timeStamp' + userPostfix
+			}).text(userName + ' | '+ timestamp);
+			// Add to DOM
+			chatPanel.append(chatMessage).append(timestamp).hide();
+			container.append(chatPanel);
+			chatPanel.fadeIn('fast');
+		};
+
+
 		$(function(){
 			// Attach event handlers
 			$('#back').click(function(){
 				window.location.href = "{{=URL('default','page')}}?page_num={{=page_num}}";
-			})
+			});
+
+			$('#replyButton').click(function(){
+				var text = $('#replyBox').val();
+				$.ajax({
+					method: 'POST',
+					url: URL.submitReply,
+					data: {
+						message: text,
+						discussion_id: ENV.discussionId
+					},
+					success: function(data){
+						var reply = JSON.parse(data);
+						addBuble(reply.id, reply.message, reply.timestamp, reply.user_name, true);
+					}
+				})
+			});
 		});
 	</script>
 {{end}}
@@ -17,7 +63,7 @@
 
 {{if len(discussion_messages) > 0:}}
 
-<div class="chatHistory">
+<div id="chatHistory">
 	{{for dm in discussion_messages:}}
 		<div class="chatPanel">
 			{{if dm.discussion_message.added_by == current_user_id:}}
@@ -30,11 +76,13 @@
 		</div>
 	{{pass}}
 </div>
+{{else:}}
+	<p class="noData">There are no replies to this discussion yet. Want to be the first? :)</p>
 {{pass}}
 
 <div class="replyPanel">
-		<input class = "replyBox" type="text" placeholder="Enter a reply here" size="70"/>
-		<a class = "replyButton" href="#">
-			Send
-		</a>
+	<input id="replyBox" type="text" placeholder="Enter a reply here" size="70"/>
+	<a id="replyButton" href="#">
+		Send
+	</a>
 </div>

@@ -38,6 +38,12 @@ a {
     text-decoration: none;
 }
 
+.noData {
+	text-align: center;
+	color: #999;
+	padding: 20px;
+}
+
 #back {
     font-size: 1.2em;
     display: inline-block;
@@ -220,11 +226,12 @@ h3 {
 }
 
 .chatMessage.user:after {
+	left: auto;
 	right: 30px;
 	border-color: #ACD8E6 transparent;
 }
 
-.chatHistory {
+#chatHistory {
 	padding: 0px 20px;
 }
 
@@ -263,14 +270,15 @@ h3 {
 	line-height: 30px;
 }
 
-.replyBox {
+#replyBox {
 	padding: 8px;
 	width: 100%;
 }
 
-.replyButton {
+#replyButton {
 	align-self: center;
-	padding: 10px;
+	padding: 10px 10px 10px 5px;
+	text-align: center;
 }
 
 .returnArrow {
