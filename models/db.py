@@ -137,6 +137,7 @@ db.define_table('user_info',
 
 db.define_table('discussion', 
     Field('title', 'string'),
+    Field('kind', 'string'),
     Field('description', 'string'),
     Field('page_num', 'integer'),
     Field('added_by','reference user_info'),

@@ -48,16 +48,18 @@ def submit_new_discussion():
     # get data
     title = request.vars.title
     description = request.vars.description
+    kind = request.vars.kind
     date_added = datetime.now()
     page_num = request.vars.page_num
-    added_by = 1 # TODO Figure out how we're handling users
+    added_by = session.user_id
     # Validate TODO fancier validation, also at client side
-    if not title or not description:
+    if not title or not description or not kind:
         response.status = 500
         return 'All fields are mandatory!'
     # Insert discussion
     discussion_id = db.discussion.insert(
         title = title,
+        kind = kind,
         description = description,
         page_num = page_num,
         added_by = added_by,

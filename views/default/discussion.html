@@ -33,6 +33,9 @@
 
 
 		$(function(){
+			// Scroll to bottom
+			$("html, body").animate({ scrollTop: $(document).height() }, 1000);
+
 			// Attach event handlers
 			$('#back').click(function(){
 				window.location.href = "{{=URL('default','page')}}?page_num={{=page_num}}";
