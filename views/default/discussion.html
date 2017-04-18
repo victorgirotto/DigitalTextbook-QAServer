@@ -25,6 +25,11 @@
 			var timestamp = $('<p></p>').attr({
 				class: 'timeStamp' + userPostfix
 			}).text(userName + ' | '+ timestamp);
+			// Check if this is the first message, and if it is, switch the views
+			if(container.children().length == 0){
+				container.show();
+				$('.noData').hide();
+			}
 			// Add to DOM
 			chatPanel.append(chatMessage).append(timestamp).hide();
 			container.append(chatPanel);
@@ -43,18 +48,23 @@
 
 			$('#replyButton').click(function(){
 				var text = $('#replyBox').val();
-				$.ajax({
-					method: 'POST',
-					url: URL.submitReply,
-					data: {
-						message: text,
-						discussion_id: ENV.discussionId
-					},
-					success: function(data){
-						var reply = JSON.parse(data);
-						addBuble(reply.id, reply.message, reply.timestamp, reply.user_name, true);
-					}
-				})
+				if(text){
+					$.ajax({
+						method: 'POST',
+						url: URL.submitReply,
+						data: {
+							message: text,
+							discussion_id: ENV.discussionId
+						},
+						success: function(data){
+							var reply = JSON.parse(data);
+							addBuble(reply.id, reply.message, reply.timestamp, reply.user_name, true);
+						}
+					});
+				}
+				// Clear reply box
+				$('#replyBox').val('');
+				return false;
 			});
 		});
 	</script>
@@ -64,9 +74,7 @@
 <h2>{{=discussion.title}}</h2>
 <p class= "description">{{=discussion.description}}</p>
 
-{{if len(discussion_messages) > 0:}}
-
-<div id="chatHistory">
+<div id="chatHistory" style="display: {{= ('block' if len(discussion_messages) > 0 else 'none') }}">
 	{{for dm in discussion_messages:}}
 		<div class="chatPanel">
 			{{if dm.discussion_message.added_by == current_user_id:}}
@@ -75,13 +83,12 @@
 			{{else:}}
 				<p class="chatMessage">{{=dm.discussion_message.message_content}}</p>
 				<p class="timeStamp">{{=dm.user_info.name}} | {{=dm.discussion_message.date_added}}</p>
-			{{pass}}	
+			{{pass}}
 		</div>
 	{{pass}}
 </div>
-{{else:}}
-	<p class="noData">There are no replies to this discussion yet. Want to be the first? :)</p>
-{{pass}}
+
+<p class="noData" style="display: {{= ('none' if len(discussion_messages) > 0 else 'block') }}">There are no replies to this discussion yet. Want to be the first? :)</p>
 
 <div class="replyPanel">
 	<input id="replyBox" type="text" placeholder="Enter a reply here" size="70"/>

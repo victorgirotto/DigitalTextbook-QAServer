@@ -90,7 +90,7 @@ plugins = PluginManager()
 # -------------------------------------------------------------------------
 # create all tables needed by auth if not custom tables
 # -------------------------------------------------------------------------
-auth.define_tables(username=False, signature=False)
+# auth.define_tables(username=False, signature=False)
 
 # -------------------------------------------------------------------------
 # configure email
@@ -157,3 +157,10 @@ db.define_table('concept',
 db.define_table('concept_discussion',
     Field('concept','reference concept'),
     Field('discussion','reference discussion'))
+
+db.define_table('task',
+    Field('name', 'string'),
+    Field('task_type', 'string'),
+    Field('icon', 'string'),
+    Field('description', 'string'),
+    Field('definition', 'string'))
