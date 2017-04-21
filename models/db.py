@@ -133,7 +133,8 @@ auth.settings.reset_password_requires_verification = True
 
 db.define_table('user_info',
     Field('name','string'),
-    Field('date_added','datetime'))
+    Field('date_added','datetime'),
+    Field('contribution_points', 'integer'))
 
 db.define_table('discussion', 
     Field('title', 'string'),
@@ -158,9 +159,21 @@ db.define_table('concept_discussion',
     Field('concept','reference concept'),
     Field('discussion','reference discussion'))
 
+'''
+db.task_template.task_template syntax examples:
+- Basic text input: {type:'text', label:'Label that will be shown before the input'}
+'''
+db.define_table('task_definition',
+    Field('name', 'string'), # Task name
+    Field('task_type', 'string'), # To which element is this task associated to: discussion reply, discussion itself, tagging, etc.
+    Field('icon', 'string'), # Icon to be displayed
+    Field('points', 'integer'), # How many points this task is worth 
+    Field('task_template', 'list:string')) # list of strings defining the structure of the task, i.e. what needs to be done. See below for syntax
+
+# This table is basically an instance of the task_definition table, as completed by an individual user
 db.define_table('task',
-    Field('name', 'string'),
-    Field('task_type', 'string'),
-    Field('icon', 'string'),
-    Field('description', 'string'),
-    Field('definition', 'string'))
+    Field('associated_to', 'integer'), # Id of the individual element it is associated to
+    Field('task_definition', 'reference task_definition'),
+    Field('user_input', 'list:string'),
+    Field('completed_by', 'reference user_info'))
+

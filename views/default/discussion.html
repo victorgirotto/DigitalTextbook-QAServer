@@ -1,5 +1,7 @@
 {{extend 'layout.html'}}
 
+{{import json}}
+
 {{block header_script}}
 	<script>
 		var URL = {
@@ -36,8 +38,50 @@
 			chatPanel.fadeIn('fast');
 		};
 
+		var openTask = function(name, points, taskDefinition){
+			openOverlay('#taskPopup', function(){
+				var inputList = $('#taskPopup ul').empty();
+				// For each input item, create ot amd add it to the DOM
+				taskDefinition.forEach(function(d,i){
+					var item = JSON.parse(d);
+					var li = $('<li></li>');
+					var label = $('<label>'+item.label+'</label>').attr({
+						for: item.name
+					});
+					var input = $('<input/>').attr({
+						type: item.type,
+						name: item.name
+					});
+					li.append(label).append(input);
+					inputList.append(li);
+				});
+				// Setup submit button
+				var submitButton = $('#taskPopup a.button');
+				submitButton.text('Submit (+'+points+')');
+			});
+			
+		};
+
+		var openOverlay = function(id, setupFunction){
+			var overlay = $('#overlay');
+			overlay.show('slow');
+			$(id, overlay).show('slow');
+			if(setupFunction){
+				setupFunction();
+			}
+		}
+
+		function closeOverlay(){
+			var overlay = $('#overlay');
+			overlay.hide('slow');
+			$('.popup').hide('slow');
+		}
 
 		$(function(){
+			$('.close').click(function(){
+				closeOverlay();
+			});
+
 			// Scroll to bottom
 			$("html, body").animate({ scrollTop: $(document).height() }, 1000);
 
@@ -76,14 +120,27 @@
 
 <div id="chatHistory" style="display: {{= ('block' if len(discussion_messages) > 0 else 'none') }}">
 	{{for dm in discussion_messages:}}
+		{{current_user_message = dm.discussion_message.added_by == current_user_id}}
 		<div class="chatPanel">
-			{{if dm.discussion_message.added_by == current_user_id:}}
-				<p class="chatMessage user">{{=dm.discussion_message.message_content}}</p>
-				<p class="timeStamp user">Me | {{=dm.discussion_message.date_added}}</p>
-			{{else:}}
-				<p class="chatMessage">{{=dm.discussion_message.message_content}}</p>
-				<p class="timeStamp">{{=dm.user_info.name}} | {{=dm.discussion_message.date_added}}</p>
-			{{pass}}
+			<div class="chatMessage {{='user' if current_user_message else ''}}">
+				<p>
+					{{=dm.discussion_message.message_content}}
+				</p>
+				{{if not current_user_message:}}
+					<ul>
+						{{for t in tasks:}}
+						<li>
+							<img src="{{=URL('static', 'images/' + t.icon)}}" 
+								alt="{{=t.name}}" 
+								onclick="openTask('{{=t.name}}', {{=t.points}}, {{=json.dumps(t.task_template)}})">
+						</li>
+						{{pass}}
+					</ul>
+				{{pass}}
+			</div>
+			<p class="timeStamp {{='user' if current_user_message else ''}}">
+				{{= 'Me' if current_user_message else dm.user_info.name}} | {{=dm.discussion_message.date_added}}
+			</p>
 		</div>
 	{{pass}}
 </div>
@@ -95,4 +152,16 @@
 	<a id="replyButton" href="#">
 		Send
 	</a>
+</div>
+
+<div id="overlay">
+    <div id="taskPopup" class="popup">
+		<div class="close">
+			<img src="{{=URL('static','images/close.png')}}" alt="">
+		</div>
+		<h2>Contribute</h2>
+		<ul>
+		</ul>
+		<a href="#" class="button submit">Submit (+5)</a>
+    </div>
 </div>

@@ -109,7 +109,17 @@ def discussion():
     discussion = db((db.discussion.id == id)).select().first()
     current_user_id = session.user_id
     # TODO retrieve messages for discussion, return correct page_num
-    return dict(discussion_id=id, user_name='Test user', current_user_id=current_user_id, discussion=discussion, discussion_messages=discussion_messages, contribution_points=21, page_num=discussion.page_num)
+    # Retrieve task types for discussion messages
+    tasks = db(db.task_definition.task_type == 'discussion_reply').select()
+    return dict(
+        discussion_id=id, 
+        user_name='Test user', 
+        current_user_id=current_user_id, 
+        discussion=discussion, 
+        discussion_messages=discussion_messages, 
+        tasks=tasks,
+        contribution_points=21, 
+        page_num=discussion.page_num)
 
 def submit_discussion_reply():
     # get vars

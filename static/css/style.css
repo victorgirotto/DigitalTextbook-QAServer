@@ -203,15 +203,31 @@ h3 {
 .chatMessage {
 	display: inline-block;
 	margin-top: 10px;
+	margin-bottom: 20px;
 	background: #CCC;
 	position: relative;
-	padding: 25px 18px 25px 18px;
+	padding: 10px;
 	width: 100%;
 	box-sizing: border-box;
 	color:black;
 	border-radius:10px;
 	border-color: black;
 }
+
+.chatMessage p {
+	padding: 0;
+	margin: 0;
+}
+
+.chatMessage ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 10px 0 0 0;
+}
+
+	.chatMessage ul > li {
+		display: inline-block;
+	}
 
 .chatMessage.user {
 	background: #ACD8E6;
@@ -389,3 +405,12 @@ h3 {
 .description {
 	margin-left: 15px;
 }
+
+#taskPopup ul {
+	list-style: none;
+	padding: 0;
+}
+
+	#taskPopup ul > li {
+		margin: 0 0 20px 0;
+	}
