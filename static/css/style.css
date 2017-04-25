@@ -265,7 +265,7 @@ h3 {
 }
 
 .replyPanel {
-	display: flex;
+	display: inline-flex;
 	position: fixed;
 	bottom: 0;
 	width: 100%;
@@ -276,11 +276,13 @@ h3 {
 }
 
 #replyBox {
+	align-self: center;
 	padding: 8px;
 	width: 100%;
 }
 
 #replyButton {
+	margin-right: 5px;
 	align-self: center;
 	padding: 10px 10px 10px 5px;
 	text-align: center;
