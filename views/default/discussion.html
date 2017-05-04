@@ -5,7 +5,8 @@
 {{block header_script}}
 	<script>
 		var URL = {
-        	submitReply: '{{=URL("default","submit_discussion_reply")}}'
+        	submitReply: '{{=URL("default","submit_discussion_reply")}}',
+			submitTask: '{{=URL("default","submit_task")}}'
 		},
 		ENV = {
 			discussionId: '{{=discussion_id}}'
@@ -38,10 +39,22 @@
 			chatPanel.fadeIn('fast');
 		};
 
-		var openTask = function(name, points, taskDefinition){
+		var openTask = function(contentId, templateId, points, taskDefinition){
 			openOverlay('#taskPopup', function(){
 				var inputList = $('#taskPopup ul').empty();
-				// For each input item, create ot amd add it to the DOM
+				var form = $('#taskPopup form');
+				// Add basic task info
+				var createInput = function(name, value){
+					return $('<input/>').attr({
+						type: 'hidden',
+						name: name,
+						value: value
+					});
+				};
+				form.append(createInput('id', templateId));
+				form.append(createInput('contentId', contentId));
+				form.append(createInput('points', points));
+				// For each input item, create li and add it to the DOM
 				taskDefinition.forEach(function(d,i){
 					var item = JSON.parse(d);
 					var li = $('<li></li>');
@@ -58,8 +71,41 @@
 				// Setup submit button
 				var submitButton = $('#taskPopup a.button');
 				submitButton.text('Submit (+'+points+')');
+				submitButton.click(function(){
+					submitTask(taskDefinition);
+				});
 			});
+		};
+
+		var submitTask = function(taskDefinition){
+			var formValue = arrayToJson($('#taskPopup form').serializeArray());
+			var taskDefinition = JSON.parse(taskDefinition);
+			var userInput = [];
+			// TODO dynamically build object
+			userInput.push({'reason':formValue.reason});
+			// Add object to data object
+			formValue['userInput'] = JSON.stringify(userInput);
 			
+			// Submit
+			$.ajax({
+				url: URL.submitTask,
+				data: formValue,
+				success: function(data){
+					// Reload page. If we want to get fancy, 
+					// we could manually update the relevant
+					// parts (e.g. contribution points).
+					location.reload();
+				}
+			});
+			closeOverlay();
+		}
+
+		var arrayToJson = function(array){
+			obj = {};
+			array.forEach(function(d,i){
+				obj[d.name] = d.value;
+			});
+			return obj;
 		};
 
 		var openOverlay = function(id, setupFunction){
@@ -132,7 +178,12 @@
 						<li>
 							<img src="{{=URL('static', 'images/' + t.icon)}}" 
 								alt="{{=t.name}}" 
-								onclick="openTask('{{=t.name}}', {{=t.points}}, {{=json.dumps(t.task_template)}})">
+								{{if dm.discussion_message.id in completed_tasks.keys() and t.id in completed_tasks[dm.discussion_message.id]:}}
+									style="opacity: 0.2"								
+								{{else:}}
+									onclick="openTask('{{=dm.discussion_message.id}}', '{{=t.id}}', {{=t.points}}, {{=json.dumps(t.task_template)}})"
+								{{pass}}
+								>
 						</li>
 						{{pass}}
 					</ul>
@@ -160,8 +211,10 @@
 			<img src="{{=URL('static','images/close.png')}}" alt="">
 		</div>
 		<h2>Contribute</h2>
-		<ul>
-		</ul>
+		<form>
+			<ul>
+			</ul>
+		</form>
 		<a href="#" class="button submit">Submit (+5)</a>
     </div>
 </div>

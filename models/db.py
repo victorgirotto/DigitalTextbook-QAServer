@@ -168,6 +168,7 @@ db.define_table('task_definition',
     Field('task_type', 'string'), # To which element is this task associated to: discussion reply, discussion itself, tagging, etc.
     Field('icon', 'string'), # Icon to be displayed
     Field('points', 'integer'), # How many points this task is worth 
+    Field('threshold', 'integer'),
     Field('task_template', 'list:string')) # list of strings defining the structure of the task, i.e. what needs to be done. See below for syntax
 
 # This table is basically an instance of the task_definition table, as completed by an individual user

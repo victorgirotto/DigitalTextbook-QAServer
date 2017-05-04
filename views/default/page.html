@@ -25,34 +25,41 @@
             var tag = $(this).text();
             var container = $('#tagDiscussionsPopup .questionsList');
             container.empty();
+
             openOverlay(
                 '#tagDiscussionsPopup',
                 function(params){
                     // Setup title
-                    $('h2 > span').text(tag);
+                    $('#tagDiscussionsPopup h2 > span').text(tag);
                     // Retrieve discussions
                     $.ajax({
                         url: URL.getDiscussionsForTag,
-                        data: {tag:tag},
+                        data: {tag:tag}, 
                         success: function(data){
                             var discussions = JSON.parse(data);
                             for(var i = 0; i < discussions.length; i++){
+
                                 var d = discussions[i];
                                 var li = $('<li></li>').attr({
                                     class: 'questionLink',
                                     'data-id': d.id
                                 }).click(redirectToDiscussion);
+
                                 var question = $('<p></p>').attr({
                                     class: 'question'
                                 }).text(d.title);
+
                                 var img = $('<img/>').attr({
                                     class: 'arrow',
                                     src: "{{=URL('static','images/arrow.png')}}"
                                 });
+
                                 question.append(img);
+
                                 var timestamp = $('<p></p>').attr({
                                     class: 'timeStamp'
                                 }).text(d.added_by + ' | ' + d.date_added); 
+
                                 li.append(question).append(timestamp);
                                 // Add to DOM
                                 container.append(li);
