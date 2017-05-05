@@ -148,7 +148,8 @@ db.define_table('discussion_message',
     Field('discussion', 'reference discussion'),
     Field('message_content','string'),
     Field('date_added','datetime'),
-    Field('added_by','reference user_info'))
+    Field('added_by','reference user_info'),
+    Field('badges','list:reference task_definition'))
 
 db.define_table('concept',
     Field('name','string'),
@@ -167,6 +168,7 @@ db.define_table('task_definition',
     Field('name', 'string'), # Task name
     Field('task_type', 'string'), # To which element is this task associated to: discussion reply, discussion itself, tagging, etc.
     Field('icon', 'string'), # Icon to be displayed
+    Field('color', 'string'), # color of the badge
     Field('points', 'integer'), # How many points this task is worth 
     Field('threshold', 'integer'),
     Field('task_template', 'list:string')) # list of strings defining the structure of the task, i.e. what needs to be done. See below for syntax

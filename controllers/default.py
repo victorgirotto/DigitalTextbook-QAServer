@@ -161,7 +161,7 @@ def submit_discussion_reply():
 def submit_task():
     associated_to = request.vars.contentId
     task_definition = request.vars.id
-    user_input = json.loads(request.vars['userInput'])
+    user_input = request.vars['userInput']
     completed_by = session.user_id
     points = int(request.vars.points)
     # insert task completion
@@ -176,11 +176,32 @@ def submit_task():
     user.update_record()
     # Update in session
     session.contribution_points = user.contribution_points
-    return user.contribution_points
     # Check if threshold is exceeded
-    # definition = db(db.task_definition.id == task_definition).select().first()
-    # count = db((db.task.task_definition == task_definition) &
-    #     (db.task.associated_to == associated_to)).count()
+    definition = db(db.task_definition.id == task_definition).select().first()
+    count = db((db.task.task_definition == task_definition) &
+        (db.task.associated_to == associated_to)).count()
+    print('Count >= definition.threshold: %d >= %d' % (count, definition.threshold))
+    if count >= definition.threshold:
+        # If the addition of this action passes the threshold, add badge to item
+        item = db(db.discussion_message.id == associated_to).select().first()
+        badges = set()
+        if item.badges:
+            badges = set(item.badges)
+        badges.add(definition.id)
+        item.badges = list(badges)
+        item.update_record()
+    return user.contribution_points
+
+def get_badge_data():
+    reply_id = request.vars.reply_id
+    task_definition_id = request.vars.task_id
+    answers = db((db.task.associated_to == reply_id) &
+        (db.task.task_definition == task_definition_id)).select(db.task.user_input)
+    results = []
+    for a in answers:
+        results += a.user_input
+    return json.dumps(results)
+        
 
 
 def __check_username():
