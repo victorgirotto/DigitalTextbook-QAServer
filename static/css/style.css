@@ -57,16 +57,28 @@ a {
 	padding: 20px;
 }
 
-#back {
+#fixedHeader {
     font-size: 1.2em;
-    display: inline-block;
+    display: flex;
+	align-items:center;
     padding: 10px;
 	position: fixed;
 	z-index: 100;
 	background: white;
 	width: 100%;
 	box-shadow: 0 0 5px white;
+	
 }
+	#fixedHeader img {
+		height: 30px;
+	}
+
+	#fixedHeader h2 {
+		display: inline-block;
+		padding: 0;
+		margin: 0;
+		height:30px;
+	}
 
 #discussionContainer {
 	padding-top: 40px;
@@ -226,6 +238,7 @@ h3 {
 	position: relative;
 	padding: 10px;
 	width: 100%;
+	min-height: 50px;
 	box-sizing: border-box;
 	color:black;
 	border-radius:10px;
@@ -235,17 +248,8 @@ h3 {
 .chatMessage p {
 	padding: 0;
 	margin: 0;
+	width: auto;
 }
-
-.chatMessage ul {
-	list-style-type: none;
-	padding: 0;
-	margin: 10px 0 0 0;
-}
-
-	.chatMessage ul > li {
-		display: inline-block;
-	}
 
 .chatMessage.user {
 	background: #ACD8E6;
@@ -434,10 +438,8 @@ h3 {
 	}
 
 .contribute {
-	width: 100%;
-	border-top: dashed 1px #999;
-	margin-top: 5px;
-	padding-top: 5px;
+	float: right;
+	margin: 0 0 20px 10px;
 }
 
 	.contribute h4 {
@@ -448,20 +450,20 @@ h3 {
 
 	.contribute > div {
 		display: inline-block;
-		margin-right: 10px;
-		padding-right: 10px;
-		border-right: dashed 1px #999;
 	}
 
-	.contribute > div:last-child {
-		border-right: none;
-	}
-
-.contribute ul > li {
-	height: 32px;
-	width: 32px;
-	position: relative;
+.contribute ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
 }
+
+	.contribute ul > li {
+		display: inline-block;
+		height: 32px;
+		width: 32px;
+		position: relative;
+	}
 
 .contribute .colorLayer {
 	width: 100%;

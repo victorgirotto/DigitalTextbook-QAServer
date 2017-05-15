@@ -183,9 +183,13 @@
 	</script>
 {{end}}
 
-<a href="#" id="back">< Back</a>
-<div id="discussionContainer">
+<div id="fixedHeader">
+	<a href="#" id="back">
+		<img src="{{=URL('static','images/back-arrow.png')}}" alt="">
+	</a>
 	<h2>{{=discussion.title}}</h2>
+</div>
+<div id="discussionContainer">
 	<p class= "description">{{=discussion.description}}</p>
 
 	<div id="chatHistory" style="display: {{= ('block' if len(discussion_messages) > 0 else 'none') }}">
@@ -193,11 +197,9 @@
 			{{current_user_message = dm.discussion_message.added_by == current_user_id}}
 			<div class="chatPanel">
 				<div class="chatMessage {{='user' if current_user_message else ''}}">
-					<p>
-						{{=dm.discussion_message.message_content}}
-					</p>
-					
+									
 					<div class="contribute">
+						<!--
 						{{if dm.discussion_message.badges:}}
 						<div>
 							<h4>Awarded badges</h4>
@@ -217,12 +219,20 @@
 							</ul>
 						</div>
 						{{pass}}
+						-->
 						{{if not current_user_message:}}
 						<div>
-							<h4>Tap icon to contribute</h4>
 							<ul>
 								{{for t in tasks:}}
 								<li>
+									{{if dm.discussion_message.badges and t.id in dm.discussion_message.badges:}}
+									<img src="{{=URL('static', 'images/' + t.icon)}}" 
+											alt="{{=t.name}}" />
+									<div class="colorLayer" 
+										style="background: {{=t.color}}; box-shadow: 0 2px 0 0 {{=t.color}}, inset 0 0 0 1px rgba(255,255,255,0.5);"
+										onclick="openBadge('{{=dm.discussion_message.id}}', '{{=t.id}}')">
+									</div>
+									{{else:}}
 									<img src="{{=URL('static', 'images/' + t.icon)}}" 
 										alt="{{=t.name}}" 
 										{{if dm.discussion_message.id in completed_tasks.keys() and t.id in completed_tasks[dm.discussion_message.id]:}}
@@ -231,12 +241,15 @@
 											onclick="openTask('{{=dm.discussion_message.id}}', '{{=t.id}}', {{=t.points}}, {{=json.dumps(t.task_template)}})"
 										{{pass}}
 										>
+									{{pass}}
 								</li>
 								{{pass}}
 							</ul>
 						</div>
 						{{pass}}
 					</div>
+					
+					<p>{{=dm.discussion_message.message_content}}</p>
 					
 				</div>
 				<p class="timeStamp {{='user' if current_user_message else ''}}">
