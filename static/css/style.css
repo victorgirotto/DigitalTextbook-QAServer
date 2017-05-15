@@ -265,7 +265,7 @@ h3 {
 }
 
 .replyPanel {
-	display: inline-flex;
+	display: flex;
 	position: fixed;
 	bottom: 0;
 	width: 100%;
