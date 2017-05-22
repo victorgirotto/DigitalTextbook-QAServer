@@ -47,10 +47,6 @@
                                     temp = false;
                                 }
                                 pn = d.page_num;
-                                if (temp == false) {
-                                    var pageNum = $('<h3></h3>').text(
-                                    'Page ' + d.page_num);
-                                }
                                 var li = $('<li></li>').attr({ //creating a new li element in memory
                                     class: 'questionLink', //adding attributes for the new element li
                                     'data-id': d.id
@@ -66,7 +62,14 @@
                                 var timestamp = $('<p></p>').attr({
                                     class: 'timeStamp'
                                 }).text(d.added_by + ' | ' + d.date_added); 
-                                li.append(pageNum).append(question).append(timestamp);
+                                // This is a new page sequence. Add title.
+                                if (temp == false) {
+                                    var pageNum = $('<h3></h3>').text(
+                                    'Page ' + d.page_num);
+                                    li.append(pageNum);
+                                }                                
+                                // Add elemnts
+                                li.append(question).append(timestamp);
                                 // Add to DOM  
                                 container.append(li); //everything that is in memory appears finally in the container and on the page   
                             }   
