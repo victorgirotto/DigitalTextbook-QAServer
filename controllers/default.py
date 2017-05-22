@@ -10,6 +10,7 @@ def login():
         # First loading the page
         return dict()
     else:
+        contribution_points = 0
         username = username.lower()
         # Form submitted
         user = db(db.user_info.name == username).select().first()
@@ -17,14 +18,17 @@ def login():
             # User does not exist. Insert
             user_id = db.user_info.insert(
                 name = username,
-                date_added = datetime.now()
+                date_added = datetime.now(),
+                contribution_points = 0
             )
         else:
             # user exists
             user_id = user.id
+            contribution_points = user.contribution_points
         # Set session
         session.user_id = user_id
         session.user_name = username
+        session.contribution_points = contribution_points
         # Redirect to page
         redirect(URL(request.application, 'default', 'page?page_num=1'))
 
@@ -43,7 +47,7 @@ def page():
     # Retrieve concepts that exist in page
     concepts = db(db.concept.related_pages.contains(page_num)).select()
     # Return values
-    return dict(page_num=page_num, discussions=discussions, concepts=concepts, user_name=session.user_name, contribution_points=21)
+    return dict(page_num=page_num, discussions=discussions, concepts=concepts, user_name=session.user_name, contribution_points=session.contribution_points)
 
 def submit_new_discussion():
     # get data
@@ -110,7 +114,30 @@ def discussion():
     discussion = db((db.discussion.id == id)).select().first()
     current_user_id = session.user_id
     # TODO retrieve messages for discussion, return correct page_num
-    return dict(discussion_id=id, user_name='Test user', current_user_id=current_user_id, discussion=discussion, discussion_messages=discussion_messages, contribution_points=21, page_num=discussion.page_num)
+    # Retrieve task types for discussion messages
+    tasks = db(db.task_definition.task_type == 'discussion_reply').select()
+    # Retrieve completed tasks by the user
+    completed_tasks = db((db.task.task_definition == db.task_definition.id) &
+        (db.task.completed_by == current_user_id) &
+        (db.task_definition.task_type == 'discussion_reply')).select(db.task.associated_to, db.task.task_definition)
+    # turn into a convenient format for the view
+    ct_dict = dict()
+    for ct in completed_tasks:
+        if ct.associated_to not in ct_dict.keys():
+            ct_dict[ct.associated_to] = []
+        ct_dict[ct.associated_to].append(ct.task_definition)
+    print(ct_dict)
+    # return
+    return dict(
+        discussion_id=id, 
+        user_name='Test user', 
+        current_user_id=current_user_id, 
+        discussion=discussion, 
+        discussion_messages=discussion_messages, 
+        tasks=tasks,
+        contribution_points=session.contribution_points, 
+        page_num=discussion.page_num,
+        completed_tasks=ct_dict)
 
 def submit_discussion_reply():
     # get vars
@@ -131,6 +158,52 @@ def submit_discussion_reply():
         timestamp = str(date_added),
         user_name = reply_id # TODO Should fetch username
     ))
+
+def submit_task():
+    associated_to = request.vars.contentId
+    task_definition = request.vars.id
+    user_input = request.vars['userInput']
+    completed_by = session.user_id
+    points = int(request.vars.points)
+    # insert task completion
+    db.task.insert(
+        associated_to=associated_to,
+        task_definition=task_definition,
+        user_input=user_input,
+        completed_by=completed_by)
+    # update points for user
+    user = db(db.user_info.id == completed_by).select().first()
+    user.contribution_points = user.contribution_points + points
+    user.update_record()
+    # Update in session
+    session.contribution_points = user.contribution_points
+    # Check if threshold is exceeded
+    definition = db(db.task_definition.id == task_definition).select().first()
+    count = db((db.task.task_definition == task_definition) &
+        (db.task.associated_to == associated_to)).count()
+    print('Count >= definition.threshold: %d >= %d' % (count, definition.threshold))
+    if count >= definition.threshold:
+        # If the addition of this action passes the threshold, add badge to item
+        item = db(db.discussion_message.id == associated_to).select().first()
+        badges = set()
+        if item.badges:
+            badges = set(item.badges)
+        badges.add(definition.id)
+        item.badges = list(badges)
+        item.update_record()
+    return user.contribution_points
+
+def get_badge_data():
+    reply_id = request.vars.reply_id
+    task_definition_id = request.vars.task_id
+    answers = db((db.task.associated_to == reply_id) &
+        (db.task.task_definition == task_definition_id)).select(db.task.user_input)
+    results = []
+    for a in answers:
+        results += a.user_input
+    return json.dumps(results)
+        
+
 
 def __check_username():
     if session.user_id == None:

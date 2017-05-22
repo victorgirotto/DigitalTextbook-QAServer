@@ -11,11 +11,20 @@ body {
 	font-family: helvetica;
 }
 
+#topContainer {
+	padding-top: 55px;
+}
+
 header {
+	box-sizing: border-box;
+	position: fixed;
+	width: 100%;
 	padding: 0px 15px;
 	background: #EEE;
 	overflow: auto;
     border-bottom: solid 1px #CCC;
+	z-index: 999;
+	box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 input,
@@ -48,10 +57,31 @@ a {
 	padding: 20px;
 }
 
-#back {
+#fixedHeader {
     font-size: 1.2em;
-    display: inline-block;
+    display: flex;
+	align-items:center;
     padding: 10px;
+	position: fixed;
+	z-index: 100;
+	background: white;
+	width: 100%;
+	box-shadow: 0 0 5px white;
+	
+}
+	#fixedHeader img {
+		height: 30px;
+	}
+
+	#fixedHeader h2 {
+		display: inline-block;
+		padding: 0;
+		margin: 0;
+		height:30px;
+	}
+
+#discussionContainer {
+	padding-top: 40px;
 }
 
 .userStats {
@@ -203,14 +233,22 @@ h3 {
 .chatMessage {
 	display: inline-block;
 	margin-top: 10px;
+	margin-bottom: 20px;
 	background: #CCC;
 	position: relative;
-	padding: 25px 18px 25px 18px;
+	padding: 10px;
 	width: 100%;
+	min-height: 50px;
 	box-sizing: border-box;
 	color:black;
 	border-radius:10px;
 	border-color: black;
+}
+
+.chatMessage p {
+	padding: 0;
+	margin: 0;
+	width: auto;
 }
 
 .chatMessage.user {
@@ -220,7 +258,7 @@ h3 {
 .chatMessage:after {
 	content: "";
 	position: absolute;
-	bottom: -15px;
+	bottom: -14px;
 	left: 30px;
 	border-width: 15px 15px 0;
 	border-style: solid;
@@ -390,4 +428,57 @@ h3 {
 
 .description {
 	margin-left: 15px;
+}
+
+#taskPopup ul {
+	list-style: none;
+	padding: 0;
+}
+
+	#taskPopup ul > li {
+		margin: 0 0 20px 0;
+	}
+
+.contribute {
+	float: right;
+	margin: 0 0 20px 10px;
+}
+
+	.contribute h4 {
+		font-size: 10px;
+		color: #666;
+		margin: 0;
+	}
+
+	.contribute > div {
+		display: inline-block;
+	}
+
+.contribute ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+	.contribute ul > li {
+		display: inline-block;
+		height: 32px;
+		width: 32px;
+		position: relative;
+	}
+
+.contribute .colorLayer {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0.4;
+	border-radius: 17px;
+}
+
+.contribute:empty {
+	border: none;
+	padding: 0;
+	margin: 0;
 }

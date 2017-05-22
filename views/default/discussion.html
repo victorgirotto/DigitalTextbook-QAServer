@@ -1,9 +1,13 @@
 {{extend 'layout.html'}}
 
+{{import json}}
+
 {{block header_script}}
 	<script>
 		var URL = {
-        	submitReply: '{{=URL("default","submit_discussion_reply")}}'
+        	submitReply: '{{=URL("default","submit_discussion_reply")}}',
+			submitTask: '{{=URL("default","submit_task")}}',
+			getBadgeData: '{{=URL("default","get_badge_data")}}'
 		},
 		ENV = {
 			discussionId: '{{=discussion_id}}'
@@ -36,8 +40,117 @@
 			chatPanel.fadeIn('fast');
 		};
 
+		var openTask = function(contentId, templateId, points, taskDefinition){
+			openOverlay('#taskPopup', function(){
+				var inputList = $('#taskPopup ul').empty();
+				var form = $('#taskPopup form');
+				// Add basic task info
+				var createInput = function(name, value){
+					return $('<input/>').attr({
+						type: 'hidden',
+						name: name,
+						value: value
+					});
+				};
+				form.append(createInput('id', templateId));
+				form.append(createInput('contentId', contentId));
+				form.append(createInput('points', points));
+				// For each input item, create li and add it to the DOM
+				taskDefinition.forEach(function(d,i){
+					var item = JSON.parse(d);
+					var li = $('<li></li>');
+					var label = $('<label>'+item.label+'</label>').attr({
+						for: item.name
+					});
+					var input = $('<input/>').attr({
+						type: item.type,
+						name: item.name
+					});
+					li.append(label).append(input);
+					inputList.append(li);
+				});
+				// Setup submit button
+				var submitButton = $('#taskPopup a.button');
+				submitButton.text('Submit (+'+points+')');
+				submitButton.click(function(){
+					submitTask(taskDefinition);
+				});
+			});
+		};
+
+		var openBadge = function(replyId, taskId){
+			openOverlay('#badgePopup', function(){
+				// Get data
+				$.ajax({
+					url:URL.getBadgeData,
+					data:{reply_id: replyId, task_id: taskId},
+					success:function(data){
+						var answers = JSON.parse(data);
+						answers.forEach(function(d,i){
+							d = JSON.parse(d);
+							var container = $('.badgeContent', '#badgePopup');
+							container.append($('<li></li>').text(d[0].reason));
+						})
+					}
+				});
+				// Setup close
+				$('.close', '#badgePopup').click(function(){
+					$('.badgeContent', '#badgePopup').empty();
+				});
+			});
+		}
+
+		var submitTask = function(taskDefinition){
+			var formValue = arrayToJson($('#taskPopup form').serializeArray());
+			var taskDefinition = JSON.parse(taskDefinition);
+			var userInput = [];
+			// TODO dynamically build object
+			userInput.push({'reason':formValue.reason});
+			// Add object to data object
+			formValue['userInput'] = JSON.stringify(userInput);
+			
+			// Submit
+			$.ajax({
+				url: URL.submitTask,
+				data: formValue,
+				success: function(data){
+					// Reload page. If we want to get fancy, 
+					// we could manually update the relevant
+					// parts (e.g. contribution points).
+					location.reload();
+				}
+			});
+			closeOverlay();
+		}
+
+		var arrayToJson = function(array){
+			obj = {};
+			array.forEach(function(d,i){
+				obj[d.name] = d.value;
+			});
+			return obj;
+		};
+
+		var openOverlay = function(id, setupFunction){
+			var overlay = $('#overlay');
+			$(id, overlay).show();
+			overlay.fadeIn('slow');
+			if(setupFunction){
+				setupFunction();
+			}
+		}
+
+		function closeOverlay(){
+			var overlay = $('#overlay');
+			overlay.fadeOut('slow');
+			$('.popup').fadeOut('slow');
+		}
 
 		$(function(){
+			$('.close').click(function(){
+				closeOverlay();
+			});
+
 			// Scroll to bottom
 			$("html, body").animate({ scrollTop: $(document).height() }, 1000);
 
@@ -70,29 +183,110 @@
 	</script>
 {{end}}
 
-<a href="#" id="back">< Back</a>
-<h2>{{=discussion.title}}</h2>
-<p class= "description">{{=discussion.description}}</p>
-
-<div id="chatHistory" style="display: {{= ('block' if len(discussion_messages) > 0 else 'none') }}">
-	{{for dm in discussion_messages:}}
-		<div class="chatPanel">
-			{{if dm.discussion_message.added_by == current_user_id:}}
-				<p class="chatMessage user">{{=dm.discussion_message.message_content}}</p>
-				<p class="timeStamp user">Me | {{=dm.discussion_message.date_added}}</p>
-			{{else:}}
-				<p class="chatMessage">{{=dm.discussion_message.message_content}}</p>
-				<p class="timeStamp">{{=dm.user_info.name}} | {{=dm.discussion_message.date_added}}</p>
-			{{pass}}
-		</div>
-	{{pass}}
+<div id="fixedHeader">
+	<a href="#" id="back">
+		<img src="{{=URL('static','images/back-arrow.png')}}" alt="">
+	</a>
+	<h2>{{=discussion.title}}</h2>
 </div>
+<div id="discussionContainer">
+	<p class= "description">{{=discussion.description}}</p>
 
-<p class="noData" style="display: {{= ('none' if len(discussion_messages) > 0 else 'block') }}">There are no replies to this discussion yet. Want to be the first? :)</p>
+	<div id="chatHistory" style="display: {{= ('block' if len(discussion_messages) > 0 else 'none') }}">
+		{{for dm in discussion_messages:}}
+			{{current_user_message = dm.discussion_message.added_by == current_user_id}}
+			<div class="chatPanel">
+				<div class="chatMessage {{='user' if current_user_message else ''}}">
+									
+					<div class="contribute">
+						<!--
+						{{if dm.discussion_message.badges:}}
+						<div>
+							<h4>Awarded badges</h4>
+							<ul>
+								{{for t in tasks:}}
+									{{if t.id in dm.discussion_message.badges:}}
+									<li>
+										<img src="{{=URL('static', 'images/' + t.icon)}}" 
+											alt="{{=t.name}}">
+										<div class="colorLayer" 
+											style="background: {{=t.color}}; box-shadow: 0 2px 0 0 {{=t.color}}, inset 0 0 0 1px rgba(255,255,255,0.5);"
+											onclick="openBadge('{{=dm.discussion_message.id}}', '{{=t.id}}')">
+										</div>
+									</li>
+									{{pass}}
+								{{pass}}
+							</ul>
+						</div>
+						{{pass}}
+						-->
+						{{if not current_user_message:}}
+						<div>
+							<ul>
+								{{for t in tasks:}}
+								<li>
+									{{if dm.discussion_message.badges and t.id in dm.discussion_message.badges:}}
+									<img src="{{=URL('static', 'images/' + t.icon)}}" 
+											alt="{{=t.name}}" />
+									<div class="colorLayer" 
+										style="background: {{=t.color}}; box-shadow: 0 2px 0 0 {{=t.color}}, inset 0 0 0 1px rgba(255,255,255,0.5);"
+										onclick="openBadge('{{=dm.discussion_message.id}}', '{{=t.id}}')">
+									</div>
+									{{else:}}
+									<img src="{{=URL('static', 'images/' + t.icon)}}" 
+										alt="{{=t.name}}" 
+										{{if dm.discussion_message.id in completed_tasks.keys() and t.id in completed_tasks[dm.discussion_message.id]:}}
+											style="opacity: 0.2"								
+										{{else:}}
+											onclick="openTask('{{=dm.discussion_message.id}}', '{{=t.id}}', {{=t.points}}, {{=json.dumps(t.task_template)}})"
+										{{pass}}
+										>
+									{{pass}}
+								</li>
+								{{pass}}
+							</ul>
+						</div>
+						{{pass}}
+					</div>
+					
+					<p>{{=dm.discussion_message.message_content}}</p>
+					
+				</div>
+				<p class="timeStamp {{='user' if current_user_message else ''}}">
+					{{= 'Me' if current_user_message else dm.user_info.name}} | {{=dm.discussion_message.date_added}}
+				</p>
+			</div>
+		{{pass}}
+	</div>
+
+	<p class="noData" style="display: {{= ('none' if len(discussion_messages) > 0 else 'block') }}">There are no replies to this discussion yet. Want to be the first? :)</p>
+</div>
 
 <div class="replyPanel">
 	<input id="replyBox" type="text" placeholder="Enter a reply here" size="70"/>
 	<a id="replyButton" href="#">
 		Send
 	</a>
+</div>
+
+<div id="overlay">
+    <div id="taskPopup" class="popup">
+		<div class="close">
+			<img src="{{=URL('static','images/close.png')}}" alt="">
+		</div>
+		<h2>Contribute</h2>
+		<form>
+			<ul>
+			</ul>
+		</form>
+		<a href="#" class="button submit">Submit (+5)</a>
+    </div>
+
+	<div id="badgePopup" class="popup">
+		<div class="close">
+			<img src="{{=URL('static','images/close.png')}}" alt="">
+		</div>
+		<h2>Badge information</h2>
+		<ul class="badgeContent"></ul>
+	</div>
 </div>
