@@ -142,7 +142,8 @@ db.define_table('discussion',
     Field('description', 'string'),
     Field('page_num', 'integer'),
     Field('added_by','reference user_info'),
-    Field('date_added','datetime'))
+    Field('date_added','datetime'),
+    Field('upvotes','integer', default=0))
 
 db.define_table('discussion_message',
     Field('discussion', 'reference discussion'),
@@ -159,6 +160,10 @@ db.define_table('concept',
 db.define_table('concept_discussion',
     Field('concept','reference concept'),
     Field('discussion','reference discussion'))
+
+db.define_table('upvote',
+    Field('discussion','reference discussion'),
+    Field('user_info','reference user_info'))
 
 '''
 db.task_template.task_template syntax examples:

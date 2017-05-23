@@ -6,7 +6,8 @@
 <script>
     var URL = {
         submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}',
-        getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}'
+        getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}',
+        toggleUpvote: '{{=URL("default","toggle_upvote")}}'
     },
     ENV = {
         pageNum: '{{=page_num}}'
@@ -93,6 +94,31 @@
         });
 
         $('.questionLink').click(redirectToDiscussion);
+
+        $('.upvote').click(function(e){
+            var button = $(this);
+            button.toggleClass('clicked');
+            var isActivation = button.hasClass('clicked');
+            // Get elements
+            var label = $('.label', button);
+            var counter = $('.counter', button);
+            // Update counter
+            var increment = isActivation ? 1 : -1;
+            var count = parseInt(counter.text()) + increment; 
+            counter.text(count);
+            // Update label
+            var newLabel = isActivation ? 'Upvoted!' : 'Upvote'
+            label.text(newLabel);
+            // Submit ajax call
+            var discussionId = button.data('id');
+            $.ajax({
+                url: URL.toggleUpvote,
+                data: {discussion: discussionId},
+                success: function(data){
+                }
+            });
+            return false;
+        });
     });
 
     function redirectToDiscussion(){
@@ -165,7 +191,12 @@
 		<p class="question"> {{=d.discussion.title}} 
 			<img class="arrow" src="{{=URL('static','images/arrow.png')}}" alt="Question Arrow">
 		</p>
-		<p class="timeStamp">Asked by {{=d.user_info.name}} | {{=d.discussion.date_added}}</p>
+		<p class="timeStamp">
+            <a href="" class="upvote {{='clicked' if d.discussion.id in user_upvotes else ''}}" data-id="{{=d.discussion.id}}">
+                <span class="label">Upvote{{='d!' if d.discussion.id in user_upvotes else ''}}</span> (<span class="counter">{{=d.discussion.upvotes}}</span>)
+            </a>
+            Asked by {{=d.user_info.name}} | {{=d.discussion.date_added}}
+        </p>
 	</li>
     {{pass}}
 </ul>

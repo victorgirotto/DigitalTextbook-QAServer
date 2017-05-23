@@ -46,8 +46,38 @@ def page():
         (db.discussion.added_by == db.user_info.id)).select(groupby=db.discussion.id)
     # Retrieve concepts that exist in page
     concepts = db(db.concept.related_pages.contains(page_num)).select()
+    # Retrieve user upvotes
+    upvotes = db(db.upvote.user_info == session.user_id).select(db.upvote.discussion)
+    upvotes = [d.discussion for d in upvotes]
     # Return values
-    return dict(page_num=page_num, discussions=discussions, concepts=concepts, user_name=session.user_name, contribution_points=session.contribution_points)
+    return dict(
+        page_num=page_num, 
+        discussions=discussions, 
+        concepts=concepts, 
+        user_name=session.user_name, 
+        user_upvotes = upvotes,
+        contribution_points=session.contribution_points)
+
+def toggle_upvote():
+    user_id = session.user_id
+    discussion_id = request.vars.discussion
+    # get discussion
+    discussion = db(db.discussion.id == discussion_id).select().first()
+    # check if already exists
+    upvotes = db((db.upvote.discussion == discussion_id) & (db.upvote.user_info == user_id)).select()
+    upvote = upvotes.first()
+    exists = True if len(upvotes) > 0 else False
+    if exists:
+        # User is removing the upvote
+        db((db.upvote.discussion == discussion_id) & (db.upvote.user_info == user_id)).delete()
+        discussion.upvotes = discussion.upvotes - 1
+        discussion.update_record()
+    else:
+        # User is upvoting
+        db.upvote.insert(discussion=discussion_id, user_info=user_id)
+        discussion.upvotes = discussion.upvotes + 1
+        discussion.update_record()
+    return True
 
 def submit_new_discussion():
     # get data
