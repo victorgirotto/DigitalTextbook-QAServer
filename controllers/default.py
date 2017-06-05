@@ -4,6 +4,8 @@ import random
 import re
 from datetime import datetime
 
+ADD_DISCUSSION_POINTS = 15
+
 def login():
     username = request.vars['username']
     if not username:
@@ -88,7 +90,8 @@ def submit_new_discussion():
     page_num = request.vars.page_num
     added_by = session.user_id
     # Deal with hashtags
-    concepts = re.findall(r"#(\w+)", description) # From http://stackoverflow.com/questions/2527892/parsing-a-tweet-to-extract-hashtags-into-an-array-in-python
+    concepts = set(re.findall(r"#(\w+)", description)) # From http://stackoverflow.com/questions/2527892/parsing-a-tweet-to-extract-hashtags-into-an-array-in-python
+    concepts = set(re.findall(r"#(\w+)", title)).union(concepts)
     ids = []
     for c in concepts:
         ids.append(__insert_concept(c, page_num))
@@ -111,6 +114,12 @@ def submit_new_discussion():
             concept = i,
             discussion = discussion_id
         )
+    # update points for user
+    user = db(db.user_info.id == added_by).select().first()
+    user.contribution_points = user.contribution_points + ADD_DISCUSSION_POINTS
+    user.update_record()
+    # Update in session
+    session.contribution_points = user.contribution_points
     return json.dumps(discussion_id)
 
 def get_discussions_for_tag():
@@ -228,10 +237,11 @@ def get_badge_data():
     task_definition_id = request.vars.task_id
     answers = db((db.task.associated_to == reply_id) &
         (db.task.task_definition == task_definition_id)).select(db.task.user_input)
+    task = db(db.task_definition.id == task_definition_id).select(db.task_definition.task_template).first()
     results = []
     for a in answers:
         results += a.user_input
-    return json.dumps(results)
+    return json.dumps(dict(task=task.task_template, results=results))
         
 
 

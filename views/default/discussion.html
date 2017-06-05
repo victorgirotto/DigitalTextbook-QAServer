@@ -86,11 +86,14 @@
 					data:{reply_id: replyId, task_id: taskId},
 					success:function(data){
 						var answers = JSON.parse(data);
-						answers.forEach(function(d,i){
+						// Update title
+						$('h2', '#badgePopup').text(JSON.parse(answers.task).label);
+						// Update answers
+						answers.results.forEach(function(d,i){
 							d = JSON.parse(d);
 							var container = $('.badgeContent', '#badgePopup');
 							container.append($('<li></li>').text(d[0].reason));
-						})
+						});
 					}
 				});
 				// Setup close
@@ -236,7 +239,8 @@
 									<img src="{{=URL('static', 'images/' + t.icon)}}" 
 										alt="{{=t.name}}" 
 										{{if dm.discussion_message.id in completed_tasks.keys() and t.id in completed_tasks[dm.discussion_message.id]:}}
-											style="opacity: 0.2"								
+											style="opacity: 0.2"
+											onclick="alert('Thank you for contributing! If more people share your opinion, you will be able to see what they thought')"								
 										{{else:}}
 											onclick="openTask('{{=dm.discussion_message.id}}', '{{=t.id}}', {{=t.points}}, {{=json.dumps(t.task_template)}})"
 										{{pass}}
@@ -286,7 +290,7 @@
 		<div class="close">
 			<img src="{{=URL('static','images/close.png')}}" alt="">
 		</div>
-		<h2>Badge information</h2>
+		<h2></h2>
 		<ul class="badgeContent"></ul>
 	</div>
 </div>

@@ -7,6 +7,14 @@
 	<link rel="stylesheet" type="text/css" href="{{=URL('static','css/style.css')}}"/>
 
     <script src="{{=URL('static','js/jquery-3.2.0.min.js')}}"></script>
+    <script>
+        $(function(){
+            $(".userStats").click(function(){
+                alert('This shows how many contribution points you have! To increase this number, you can:' +
+                '\n1) Create new discussions\n2) Evaluate other people\'s responses to a discussions');
+            })
+        });
+    </script>
     {{block header_script}}
     {{end}}
 </head>

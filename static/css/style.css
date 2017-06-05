@@ -39,7 +39,7 @@ textarea {
 }
 
 input[type=text] {
-	width: 100%;
+	width: 96%;
 }
 
 header .name {
@@ -491,4 +491,23 @@ h3 {
 	border: none;
 	padding: 0;
 	margin: 0;
+}
+
+.hint {
+	color: #888;
+	margin: 0;
+}
+
+ul.noBullet {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+	ul.noBullet > li {
+		margin: 0 0 20px 0;
+	}
+
+#discussionStartBtn {
+	margin-top: -11px;
 }

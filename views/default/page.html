@@ -128,8 +128,8 @@
 
     function openOverlay(id, setupFunction){
         var overlay = $('#overlay');
-        overlay.show('slow');
-        $(id, overlay).show('slow');
+        overlay.fadeIn('slow');
+        $(id, overlay).fadeIn('slow');
         if(setupFunction){
             setupFunction();
         }
@@ -137,8 +137,8 @@
 
     function closeOverlay(){
         var overlay = $('#overlay');
-        overlay.hide('slow');
-        $('.popup').hide('slow');
+        overlay.fadeOut('slow');
+        $('.popup').fadeOut('slow');
     }
 
     function submitDiscussion(){
@@ -167,15 +167,15 @@
 </script>
 {{end}}
 
-<h2>Tags in page {{=page_num}}</h2>
+<h2>Hashtags in page {{=page_num}}</h2>
 
 <ul class="linkList divisor">
     {{if len(concepts) > 0:}}
         {{for c in concepts:}}
-            <li><a class="tag" href="#" style="background: {{=c.color}};">{{=c.name}}</a></li>
+            <li><a class="tag" href="#" style="background: {{=c.color}};">#{{=c.name}}</a></li>
         {{pass}}
     {{else:}}
-        <li>No concepts exist for this page.</li>
+        <li>No hashtags in this page yet. Add a discussion to change that!</li>
     {{pass}}
 </ul>
 
@@ -229,17 +229,28 @@
 
         <p>
             <h3>Title</h3>
-            <input type="text" name="title" placeholder="Suggest a title for your discussion"/>
+            <input type="text" name="title" id="discussionTitle" placeholder="Suggest a title for your discussion"/>
         </p>
 
         <p>
             <h3>Kind</h3>
-            <input type="radio" name="kind" id="kindDiscussion" value="discussion"> <label for="kindDiscussion">Discussion</label>
-            <input type="radio" name="kind" id="kindFactual" value="factual"> <label for="kindFactual">Factual</label> 
+            <ul class="noBullet">
+                <li>
+                    <input type="radio" name="kind" id="kindDiscussion" value="discussion"> 
+                    <label for="kindDiscussion">Discussion</label>
+                    <p class="hint">Pick this if your discussion is open ended</p>
+                </li>
+                <li>
+                    <input type="radio" name="kind" id="kindFactual" value="factual"> 
+                    <label for="kindFactual">Factual</label> 
+                    <p class="hint">Pick this if you need a clear cut answer</p>
+                </li>
+            </ul>
         </p>
 
         <p>
             <h3>Description</h3>
+            <p class="hint">Use #hashtags to make your discussion more visible!</p>
             <textarea id="descriptionTextarea" name="description" placeholder="Enter a longer description of your discussion"></textarea>
         </p>
 
