@@ -7,7 +7,8 @@
     var URL = {
         submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}',
         getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}',
-        toggleUpvote: '{{=URL("default","toggle_upvote")}}'
+        toggleUpvote: '{{=URL("default","toggle_upvote")}}',
+        discussion: '{{=URL("default","discussion")}}'
     },
     ENV = {
         pageNum: '{{=page_num}}'
@@ -119,7 +120,43 @@
             });
             return false;
         });
+
+        // Navigate to anchor
+        window.location = "#page" + ENV.pageNum;
+
+        // Connect to websocket
+        if(!$.web2py.web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup', function(e){
+            var response = JSON.parse(e.data);
+            openNotification(response.data.event, response.data.user, response.data.body, URL.discussion + '?id=' + response.data.id, response.data.title);
+        })){
+            alert("html5 websocket not supported by your browser, try Google Chrome");
+        }
+        
     });
+
+    function openNotification(type, user, text, link, discussionTitle){
+        var panel = $('#notificationPanel');
+        var notification = $('<div class="notification"></div>');
+        var headerStr = 'New ' + type +' by ' + user;
+        if (discussionTitle){
+            headerStr += ' on "' + discussionTitle + '"'
+        }
+        var header = $('<h2></h2>').text(headerStr);
+        var body = $("<p></p>").text(text);
+        notification.append(header).append(body);
+        notification.hide();
+        panel.append(notification);
+
+        // Attach event handler
+        notification.click(function(){
+            window.location = link;
+        });
+
+        notification.show('fast');
+        window.setTimeout(function(){
+            notification.hide('fast');
+        }, 7000)
+    }
 
     function redirectToDiscussion(){
         var id = $(this).data('id');
@@ -167,6 +204,7 @@
 </script>
 {{end}}
 
+<!--
 <h2>Hashtags in page {{=page_num}}</h2>
 
 <ul class="linkList divisor">
@@ -178,15 +216,22 @@
         <li>No hashtags in this page yet. Add a discussion to change that!</li>
     {{pass}}
 </ul>
+-->
 
-<h2>
-	Discussions for page {{=page_num}}
-	<a id="discussionStartBtn" class="button specialButton" href="#" >Start a discussion (+15 points)</a>
-</h2>
+<a id="discussionStartBtn" class="button specialButton" href="#" >+</a>
+
+<div id="notificationPanel">
+</div>
 
 {{if len(discussions) > 0:}}
 <ul class="questionsList"> 
+    {{last_page = -1}}
     {{for d in discussions:}}
+
+    {{if d.discussion.page_num != last_page:}}
+    <li><h2 id="page{{=d.discussion.page_num}}">Page {{=d.discussion.page_num}}</h2></li>
+    {{pass}}
+    {{last_page = d.discussion.page_num}}
 	<li class="questionLink" data-id="{{=d.discussion.id}}">
 		<p class="question"> {{=d.discussion.title}} 
 			<img class="arrow" src="{{=URL('static','images/arrow.png')}}" alt="Question Arrow">
@@ -232,11 +277,11 @@
             <input type="text" name="title" id="discussionTitle" placeholder="Suggest a title for your discussion"/>
         </p>
 
-        <p>
+        <!-- <p style="display: none">
             <h3>Kind</h3>
             <ul class="noBullet">
                 <li>
-                    <input type="radio" name="kind" id="kindDiscussion" value="discussion"> 
+                    <input type="radio" name="kind" id="kindDiscussion" value="discussion" selected> 
                     <label for="kindDiscussion">Discussion</label>
                     <p class="hint">Pick this if your discussion is open ended</p>
                 </li>
@@ -246,11 +291,11 @@
                     <p class="hint">Pick this if you need a clear cut answer</p>
                 </li>
             </ul>
-        </p>
+        </p> -->
 
         <p>
             <h3>Description</h3>
-            <p class="hint">Use #hashtags to make your discussion more visible!</p>
+            <!-- <p class="hint">Use #hashtags to make your discussion more visible!</p> -->
             <textarea id="descriptionTextarea" name="description" placeholder="Enter a longer description of your discussion"></textarea>
         </p>
 

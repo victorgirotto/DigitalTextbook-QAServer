@@ -171,14 +171,18 @@ h3 {
 .questionsList {
 	padding: 0 0 15px 15px;
 	list-style-type: none;
+	margin-bottom: 80px;
+}
+
+.questionsList h2 {
+	margin: 30px 0 0 0;
 }
 
 .questionLink {
     position: relative;
 	margin-left: 0px;
 	margin-right: 10px;
-    padding: 20px 0;
-	border-bottom: solid 1px #CCC;
+    padding-bottom: 10px 0;
 }
 
 .questionLink:last-child {
@@ -509,5 +513,44 @@ ul.noBullet {
 	}
 
 #discussionStartBtn {
-	margin-top: -11px;
+	display: block;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	height: 30px;
+	width: 30px;
+	line-height: 30px;
+	border-radius: 30px;
+	text-align: center;
+	font-size: 3em;
+	box-shadow: 2px 2px 6px #999;
+	z-index: 99999;
 }
+
+#notificationPanel {
+	position: fixed;
+	top: 70px;
+	right: 15px;
+	width: 195px;
+	z-index: 9999;
+}
+
+.notification {
+	background: rgba(120, 192, 240, 0.9);
+	border-bottom: solid 1px rgba(255,255,255,0.3);
+	border-radius: 10px;
+	box-shadow: 2px 2px 6px rgba(150, 150, 150, 0.9);
+	font-size: 12px;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+
+	.notification h2 {
+		font-size: 12px;
+		margin: 0;
+	}
+
+	.notification p {
+		margin: 0;
+	}

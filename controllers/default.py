@@ -3,8 +3,14 @@ import json
 import random
 import re
 from datetime import datetime
+from gluon.contrib.websocket_messaging import websocket_send
 
 ADD_DISCUSSION_POINTS = 15
+
+EVENTS = dict(
+    new_discussion="discussion",
+    new_comment="comment"
+)
 
 def login():
     username = request.vars['username']
@@ -44,8 +50,8 @@ def page():
         return 'You must supply a page_num param'
     # Retrieve discussions for page page_num
     discussions = db(
-        (db.discussion.page_num == page_num) &
-        (db.discussion.added_by == db.user_info.id)).select(groupby=db.discussion.id)
+        # (db.discussion.page_num == page_num) &
+        (db.discussion.added_by == db.user_info.id)).select(groupby=db.discussion.id, orderby=db.discussion.page_num)
     # Retrieve concepts that exist in page
     concepts = db(db.concept.related_pages.contains(page_num)).select()
     # Retrieve user upvotes
@@ -96,7 +102,7 @@ def submit_new_discussion():
     for c in concepts:
         ids.append(__insert_concept(c, page_num))
     # Validate TODO fancier validation, also at client side
-    if not title or not description or not kind:
+    if not title or not description:# or not kind:
         response.status = 500
         return 'All fields are mandatory!'
     # Insert discussion
@@ -120,6 +126,13 @@ def submit_new_discussion():
     user.update_record()
     # Update in session
     session.contribution_points = user.contribution_points
+    # Send push notification
+    __push_notification('notification', dict(
+        event=EVENTS['new_discussion'], 
+        user=session.user_name, 
+        body=title,
+        id=discussion_id,
+        page=page_num))
     return json.dumps(discussion_id)
 
 def get_discussions_for_tag():
@@ -191,6 +204,16 @@ def submit_discussion_reply():
         date_added = date_added,
         added_by = user_id
     )
+    # Get discussion title
+    title = db(db.discussion.id == discussion_id).select(db.discussion.title).first().title
+    # Send notification
+    __push_notification('notification', dict(
+        event=EVENTS['new_comment'], 
+        user=session.user_name, 
+        title=title,
+        id=discussion_id,
+        body=message))
+    
     return json.dumps(dict(
         id = reply_id,
         message = message,
@@ -242,8 +265,19 @@ def get_badge_data():
     for a in answers:
         results += a.user_input
     return json.dumps(dict(task=task.task_template, results=results))
-        
 
+def testws():
+    __push_notification("notification", "something")
+
+
+
+def __push_notification(type, data):
+    websocket_send(
+        'http://127.0.0.1:8888', 
+        json.dumps(dict(type=type,data=data)), 
+        'mykey', 
+        'mygroup')
+    return 0
 
 def __check_username():
     if session.user_id == None:
