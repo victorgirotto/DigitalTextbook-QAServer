@@ -132,7 +132,8 @@ def submit_new_discussion():
         user=session.user_name, 
         body=title,
         id=discussion_id,
-        page=page_num))
+        page=page_num,
+        timestamp=str(date_added)))
     return json.dumps(discussion_id)
 
 def get_discussions_for_tag():
@@ -182,7 +183,7 @@ def discussion():
     # return
     return dict(
         discussion_id=id, 
-        user_name='Test user', 
+        user_name=session.user_name, 
         current_user_id=current_user_id, 
         discussion=discussion, 
         discussion_messages=discussion_messages, 
@@ -212,7 +213,8 @@ def submit_discussion_reply():
         user=session.user_name, 
         title=title,
         id=discussion_id,
-        body=message))
+        body=message,
+        timestamp=str(date_added)))
     
     return json.dumps(dict(
         id = reply_id,

@@ -9,12 +9,62 @@
     <script src="{{=URL('static','js/jquery-3.2.0.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py.js')}}"></script>
     <script>
+        var URL = {
+            submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}',
+            getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}',
+            toggleUpvote: '{{=URL("default","toggle_upvote")}}',
+            discussion: '{{=URL("default","discussion")}}'
+        },        
+        ENV = {};
+
         $(function(){
             $(".userStats").click(function(){
                 alert('This shows how many contribution points you have! To increase this number, you can:' +
                 '\n1) Create new discussions\n2) Evaluate other people\'s responses to a discussions');
             })
+
+            // Connect to websocket
+            if(!$.web2py.web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup', function(e){
+                var response = JSON.parse(e.data);
+                if (response.data.user !== '{{=user_name}}'){
+                    openNotification(
+                        response.data.event, 
+                        response.data.user, 
+                        response.data.body, 
+                        URL.discussion + '?id=' + response.data.id, 
+                        response.data.id,
+                        response.data.title,
+                        response.data.timestamp,
+                        response.data.page);
+                }
+            })){
+                alert("html5 websocket not supported by your browser, try Google Chrome");
+            }
         });
+
+        var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum){
+            var panel = $('#notificationPanel');
+            var notification = $('<div class="notification"></div>');
+            var headerStr = 'New ' + type +' by ' + user;
+            if (discussionTitle){
+                headerStr += ' on "' + discussionTitle + '"'
+            }
+            var header = $('<h2></h2>').text(headerStr);
+            var body = $("<p></p>").text(text);
+            notification.append(header).append(body);
+            notification.hide();
+            panel.append(notification);
+
+            // Attach event handler
+            notification.click(function(){
+                window.location = link;
+            });
+
+            notification.show('fast');
+            window.setTimeout(function(){
+                notification.hide('fast');
+            }, 7000)
+        }
     </script>
     {{block header_script}}
     {{end}}
@@ -32,6 +82,11 @@
 
 <div id="topContainer">
 {{include}}
+
+
+<div id="notificationPanel">
+</div>
+
 </div>
 
 </body>

@@ -4,15 +4,23 @@
 <script src="{{=URL('static', 'js/autosize.min.js')}}"></script>
 <script src="{{=URL('static', 'js/jquery.hashtags.min.js')}}"></script>
 <script>
-    var URL = {
-        submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}',
-        getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}',
-        toggleUpvote: '{{=URL("default","toggle_upvote")}}',
-        discussion: '{{=URL("default","discussion")}}'
-    },
-    ENV = {
-        pageNum: '{{=page_num}}'
-    }
+    
+    URL.submitNewDiscussion = '{{=URL("default","submit_new_discussion")}}';
+    URL.getDiscussionsForTag = '{{=URL("default","get_discussions_for_tag")}}';
+    URL.toggleUpvote = '{{=URL("default","toggle_upvote")}}';
+    URL.discussion = '{{=URL("default","discussion")}}';
+
+    ENV.pageNum = '{{=page_num}}';
+
+    // Copy general function
+    var openGeneralNotification = openNotification;
+    // Override openNotification function
+    var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum){
+        // Open notification
+        openGeneralNotification(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum);
+        // Add discussion
+        addDiscussion(text, user, timestamp, discussionId, parseInt(pageNum));
+    };
 
     $(function(){
         // Setup hashtags
@@ -94,69 +102,100 @@
             submitDiscussion();
         });
 
-        $('.questionLink').click(redirectToDiscussion);
+        $('.questionsList li').click(redirectToDiscussion);
 
-        $('.upvote').click(function(e){
-            var button = $(this);
-            button.toggleClass('clicked');
-            var isActivation = button.hasClass('clicked');
-            // Get elements
-            var label = $('.label', button);
-            var counter = $('.counter', button);
-            // Update counter
-            var increment = isActivation ? 1 : -1;
-            var count = parseInt(counter.text()) + increment; 
-            counter.text(count);
-            // Update label
-            var newLabel = isActivation ? 'Upvoted!' : 'Upvote'
-            label.text(newLabel);
-            // Submit ajax call
-            var discussionId = button.data('id');
-            $.ajax({
-                url: URL.toggleUpvote,
-                data: {discussion: discussionId},
-                success: function(data){
-                }
-            });
-            return false;
-        });
+        $('.upvote').click(setupUpvote);
 
         // Navigate to anchor
         window.location = "#page" + ENV.pageNum;
-
-        // Connect to websocket
-        if(!$.web2py.web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup', function(e){
-            var response = JSON.parse(e.data);
-            openNotification(response.data.event, response.data.user, response.data.body, URL.discussion + '?id=' + response.data.id, response.data.title);
-        })){
-            alert("html5 websocket not supported by your browser, try Google Chrome");
-        }
-        
     });
 
-    function openNotification(type, user, text, link, discussionTitle){
-        var panel = $('#notificationPanel');
-        var notification = $('<div class="notification"></div>');
-        var headerStr = 'New ' + type +' by ' + user;
-        if (discussionTitle){
-            headerStr += ' on "' + discussionTitle + '"'
-        }
-        var header = $('<h2></h2>').text(headerStr);
-        var body = $("<p></p>").text(text);
-        notification.append(header).append(body);
-        notification.hide();
-        panel.append(notification);
-
-        // Attach event handler
-        notification.click(function(){
-            window.location = link;
+    var setupUpvote = function(e){
+        var button = $(this);
+        button.toggleClass('clicked');
+        var isActivation = button.hasClass('clicked');
+        // Get elements
+        var label = $('.label', button);
+        var counter = $('.counter', button);
+        // Update counter
+        var increment = isActivation ? 1 : -1;
+        var count = parseInt(counter.text()) + increment; 
+        counter.text(count);
+        // Update label
+        var newLabel = isActivation ? 'Upvoted!' : 'Upvote'
+        label.text(newLabel);
+        // Submit ajax call
+        var discussionId = button.data('id');
+        $.ajax({
+            url: URL.toggleUpvote,
+            data: {discussion: discussionId},
+            success: function(data){
+            }
         });
+        return false;
+    };
 
-        notification.show('fast');
-        window.setTimeout(function(){
-            notification.hide('fast');
-        }, 7000)
-    }
+    function addDiscussion(text, user, timestamp, discussionId, pageNum){
+        // Find correct spot to insert new discussion
+        var insertBeforeElement = $('.questionsList');
+        var pageExists = false;
+        var lis = $('[class^=page]');
+        for(var i = 0; i < lis.length; i++){
+            var d = lis[i];
+            var page = parseInt($(d).attr('class').replace("page",""));
+            if (page == pageNum){ // Check if the header already exists
+                pageExists = true;
+            }
+            if(page > pageNum){
+                // The next element is a page higher than this one. Insert before
+                // Create header li if it doesn't exists
+                insertBeforeElement = $(d);
+                break;
+            }
+        };
+
+        // Generate elements
+        var upvote = '<p class="timeStamp">\
+                <a href="" class="upvote " data-id="26">\
+                    <span class="label">Upvote</span> (<span class="counter">0</span>)\
+                </a>\
+                Asked by test2 | 2017-09-28 16:45:40\
+            </p>';
+        var newQuestion = $('<li></li>').attr({
+            class:'page' + pageNum,
+            'data-id': discussionId
+        })
+        .append($('<p></p>').attr({
+            class: 'question'
+        })
+            .text(text)
+            .append($('<img></img>').attr({
+                class: 'arrow',
+                src: "{{=URL('static','images/arrow.png')}}"
+            })))
+        .append(upvote);
+
+        // Attach click handler
+        newQuestion.click(redirectToDiscussion);
+        $('.upvote',newQuestion).click(setupUpvote);
+
+        // Add to DOM
+        if(lis.length == 0 || lis.length == i){
+            if(!pageExists){ // Create title li if it doesn't exist
+                var header = $('<li><h2>Page ' + pageNum +  '</h2></li>');
+                insertBeforeElement.append(header);
+            }
+            // The list is empty or this is the last element. Simply append to list.
+            insertBeforeElement.append(newQuestion);   
+        } else {
+            if(!pageExists){
+                var header = $('<li><h2>Page ' + pageNum +  '</h2></li>');
+                header.insertBefore(insertBeforeElement);
+            }
+            // This is a middle element. Insert before the next header
+            newQuestion.insertBefore(insertBeforeElement);
+        }
+    };
 
     function redirectToDiscussion(){
         var id = $(this).data('id');
@@ -220,8 +259,6 @@
 
 <a id="discussionStartBtn" class="button specialButton" href="#" >+</a>
 
-<div id="notificationPanel">
-</div>
 
 {{if len(discussions) > 0:}}
 <ul class="questionsList"> 
@@ -229,10 +266,10 @@
     {{for d in discussions:}}
 
     {{if d.discussion.page_num != last_page:}}
-    <li><h2 id="page{{=d.discussion.page_num}}">Page {{=d.discussion.page_num}}</h2></li>
+    <li class="page{{=d.discussion.page_num}}"><h2>Page {{=d.discussion.page_num}}</h2></li>
     {{pass}}
     {{last_page = d.discussion.page_num}}
-	<li class="questionLink" data-id="{{=d.discussion.id}}">
+	<li class="page{{=d.discussion.page_num}}" data-id="{{=d.discussion.id}}">
 		<p class="question"> {{=d.discussion.title}} 
 			<img class="arrow" src="{{=URL('static','images/arrow.png')}}" alt="Question Arrow">
 		</p>

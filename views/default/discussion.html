@@ -4,15 +4,24 @@
 
 {{block header_script}}
 	<script>
-		var URL = {
-        	submitReply: '{{=URL("default","submit_discussion_reply")}}',
-			submitTask: '{{=URL("default","submit_task")}}',
-			getBadgeData: '{{=URL("default","get_badge_data")}}'
-		},
-		ENV = {
-			discussionId: '{{=discussion_id}}'
-		}
+		URL.submitReply = '{{=URL("default","submit_discussion_reply")}}';
+		URL.submitTask = '{{=URL("default","submit_task")}}';
+		URL.getBadgeData = '{{=URL("default","get_badge_data")}}';
+		
+		ENV.discussionId = '{{=discussion_id}}';
 
+		// Copy general function
+		var openGeneralNotification = openNotification;
+		// Override openNotification function
+		var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp){
+			if(ENV.discussionId == discussionId){ // TODO check if the notification is on this thread
+				// New message in this thread
+				addBuble(0, text, timestamp, user, user === '{{=user_name}}');
+			} else {
+				// New message is in another thread. Open general notification
+				openGeneralNotification(type, user, text, link, discussionId, discussionTitle, timestamp);
+			}
+		};
 
 		var addBuble = function(id, message, timestamp, userName, isCurrentUserMessage){
 			// Create bubble in memory.
@@ -38,6 +47,8 @@
 			chatPanel.append(chatMessage).append(timestamp).hide();
 			container.append(chatPanel);
 			chatPanel.fadeIn('fast');
+			// Scroll to bottom
+			window.scrollTo(0,document.body.scrollHeight);
 		};
 
 		var openTask = function(contentId, templateId, points, taskDefinition){
@@ -200,7 +211,8 @@
 			{{current_user_message = dm.discussion_message.added_by == current_user_id}}
 			<div class="chatPanel">
 				<div class="chatMessage {{='user' if current_user_message else ''}}">
-									
+					
+					<!--
 					<div class="contribute">
 						<!--
 						{{if dm.discussion_message.badges:}}
@@ -222,7 +234,7 @@
 							</ul>
 						</div>
 						{{pass}}
-						-->
+						- ->
 						{{if not current_user_message:}}
 						<div>
 							<ul>
@@ -252,7 +264,7 @@
 						</div>
 						{{pass}}
 					</div>
-					
+					-->
 					<p>{{=dm.discussion_message.message_content}}</p>
 					
 				</div>

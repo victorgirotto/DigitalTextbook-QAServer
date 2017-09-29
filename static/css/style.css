@@ -178,14 +178,14 @@ h3 {
 	margin: 30px 0 0 0;
 }
 
-.questionLink {
+.questionsList li {
     position: relative;
 	margin-left: 0px;
 	margin-right: 10px;
     padding-bottom: 10px 0;
 }
 
-.questionLink:last-child {
+.questionsList li:last-child {
     border-bottom: none;
 }
 
