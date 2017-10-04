@@ -26,14 +26,19 @@
 		var addBuble = function(id, message, timestamp, userName, isCurrentUserMessage){
 			// Create bubble in memory.
 			// Note: this is not a good practice. Ideally we'd use some sort of template engine, e.g. Mustache. But this is faster right now.
+			var userPostfix = isCurrentUserMessage ? ' user' : '';
+			var hasTask = isCurrentUserMessage ? false : true;
+			var hasTaskClass = isCurrentUserMessage ? 'notask' : 'task';
 			var container = $('#chatHistory');
 			var chatPanel = $('<div></div>').attr({
 				class: 'chatPanel'
 			});
-			var userPostfix = isCurrentUserMessage ? ' user' : '';
-			var chatMessage = $('<p></p>').attr({
-				class: 'chatMessage' + userPostfix
-			}).text(message);
+			
+			var innerContainer = $('<div></div>').attr({
+				class: 'chatMessage ' + userPostfix + ' ' + hasTaskClass
+			});
+			chatPanel.append(innerContainer);
+			var chatMessage = $('<p></p>').attr({}).text(message);
 			var userName = isCurrentUserMessage ? 'Me' : userName;
 			var timestamp = $('<p></p>').attr({
 				class: 'timeStamp' + userPostfix
@@ -44,11 +49,42 @@
 				$('.noData').hide();
 			}
 			// Add to DOM
-			chatPanel.append(chatMessage).append(timestamp).hide();
+			chatPanel.hide();
+			if(hasTask){
+				addTask(chatPanel);
+			}
+			innerContainer.append(chatMessage);
+			chatPanel.append(timestamp);
 			container.append(chatPanel);
+			
 			chatPanel.fadeIn('fast');
 			// Scroll to bottom
 			window.scrollTo(0,document.body.scrollHeight);
+		};
+
+		var addTask = function(chatPanel){
+			// <div>
+			// 	<p>Does this message reply or refer to another user's message?</p>
+			// 	<div class="choices">
+			// 		<a href="#">Yes</a>
+			// 		<a href="#">No</a>
+			// 	</div>
+			// </div>
+			// Create and append element
+			var innerContainer = $('.chatMessage',chatPanel);
+			var message = 'Does this message reply or refer to another user\'s message?';
+			var taskArea = $('<div class="taskArea"><div><p>'+message+'</p><div class="choices"></div></div></div>')
+			innerContainer.append(taskArea);
+			// Set classes
+			innerContainer.removeClass('notask');
+			// Set options
+			var optionsContainer = $('.choices', chatPanel);
+			var choices = ['YES', 'NO'];
+			choices.forEach(function(d,i){
+				optionsContainer.append($('<a>' + d + '</a>').attr({
+					hred: '#'
+				}));
+			});
 		};
 
 		var openTask = function(contentId, templateId, points, taskDefinition){
@@ -210,7 +246,7 @@
 		{{for dm in discussion_messages:}}
 			{{current_user_message = dm.discussion_message.added_by == current_user_id}}
 			<div class="chatPanel">
-				<div class="chatMessage {{='user' if current_user_message else ''}}">
+				<div class="chatMessage {{='user notask' if current_user_message else ''}}">
 					
 					<!--
 					<div class="contribute">
@@ -265,7 +301,20 @@
 						{{pass}}
 					</div>
 					-->
-					<p>{{=dm.discussion_message.message_content}}</p>
+					<p>
+						{{=dm.discussion_message.message_content}}
+						{{if not current_user_message:}}
+						<div class="taskArea">
+							<div>
+								<p>Does this message reply or refer to another user's message?</p>
+								<div class="choices">
+									<a href="#">Yes</a>
+									<a href="#">No</a>
+								</div>
+							</div>
+						</div>
+						{{pass}}
+					</p>
 					
 				</div>
 				<p class="timeStamp {{='user' if current_user_message else ''}}">

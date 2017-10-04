@@ -24,7 +24,7 @@
             })
 
             // Connect to websocket
-            if(!$.web2py.web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup', function(e){
+            if(!$.web2py.web2py_websocket('ws://192.168.0.18:8888/realtime/mygroup', function(e){
                 var response = JSON.parse(e.data);
                 if (response.data.user !== '{{=user_name}}'){
                     openNotification(
@@ -76,7 +76,7 @@
       {{=user_name}}
   </h2>
   <p class="userStats">
-	  Contribution points <span>{{=contribution_points}}</span>
+	  <!-- Contribution points <span>{{=contribution_points}}</span> -->
 	</p>
 </header>
 
