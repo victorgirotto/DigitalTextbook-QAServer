@@ -2,8 +2,10 @@
 import json
 import random
 import re
+import operator
 from datetime import datetime
 from gluon.contrib.websocket_messaging import websocket_send
+from collections import defaultdict
 
 ADD_DISCUSSION_POINTS = 15
 CLASSIFICATION_THRESHOLD = 3
@@ -290,11 +292,13 @@ def classify_reply():
 
     # Update reply classification count
     reply = db(db.discussion_message.id == reply_id).select().first()
-    count = reply.classification_count
-    reply.classification_count = count + 1
+    count = reply.classification_count + 1
+    reply.classification_count = count
     if count >= CLASSIFICATION_THRESHOLD:
         reply.classified = True
-        __update_user_stats(reply_author, classification)
+        classifications = db(db.message_classification.discussion_message == reply_id).select(db.message_classification.classification)
+        classifications = [c.classification for c in classifications]
+        __update_user_stats(reply_author, classifications)
     reply.update_record()
 
 def get_user_stats():
@@ -305,12 +309,16 @@ def testws():
     __push_notification("notification", "something")
 
 
-def __update_user_stats(user, classification):
+def __update_user_stats(user, classifications):
     print('Updating user ' + user)
     user = db(db.user_info.id == user).select().first()
-
-    # TODO increment based on majority vote rather than the last one
-    # e.g. if 2 people said OPER and 1 said REPR, increment p_oper
+    print(classifications)
+    # Count
+    count = defaultdict(int)
+    for c in classifications:
+        count[c] += 1
+    classification = max(count.iteritems(), key=operator.itemgetter(1))[0]
+    print(classification)
 
     # Define overall classification
     if classification.startswith('OPER'):

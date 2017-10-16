@@ -2,14 +2,15 @@
 RESTful endpoint for DT Q&amp;A
 
 TODO for studies:
-* Update user stats based on majority vote (see __update_user_stats on default.py)
 * Popup with explanations of the user stats when user taps the stats bar
 * LOG EVERYTHING
+* Enable submit message on enter
 
 KNOWN ISSUES:
 No known issues at this point.
 
 DONE:
+* Update user stats based on majority vote (see __update_user_stats on default.py)
 * Implement workflow
 * Single page for discussions
 * Notifications
