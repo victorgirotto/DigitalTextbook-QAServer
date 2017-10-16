@@ -6,6 +6,7 @@ from datetime import datetime
 from gluon.contrib.websocket_messaging import websocket_send
 
 ADD_DISCUSSION_POINTS = 15
+CLASSIFICATION_THRESHOLD = 3
 
 EVENTS = dict(
     new_discussion="discussion",
@@ -173,6 +174,8 @@ def discussion():
     completed_tasks = db((db.task.task_definition == db.task_definition.id) &
         (db.task.completed_by == current_user_id) &
         (db.task_definition.task_type == 'discussion_reply')).select(db.task.associated_to, db.task.task_definition)
+    
+    classified_messages = db(db.message_classification.classified_by == current_user_id).select(db.message_classification.discussion_message)
     # turn into a convenient format for the view
     ct_dict = dict()
     for ct in completed_tasks:
@@ -180,6 +183,10 @@ def discussion():
             ct_dict[ct.associated_to] = []
         ct_dict[ct.associated_to].append(ct.task_definition)
     print(ct_dict)
+
+    cl_msg = set()
+    for cm in classified_messages:
+        cl_msg.add(cm.discussion_message)
     # return
     return dict(
         discussion_id=id, 
@@ -190,7 +197,8 @@ def discussion():
         tasks=tasks,
         contribution_points=session.contribution_points, 
         page_num=discussion.page_num,
-        completed_tasks=ct_dict)
+        completed_tasks=ct_dict,
+        classified_messages=cl_msg)
 
 def submit_discussion_reply():
     # get vars
@@ -268,9 +276,50 @@ def get_badge_data():
         results += a.user_input
     return json.dumps(dict(task=task.task_template, results=results))
 
+def classify_reply():
+    reply_id = request.vars['id']
+    classification = request.vars['classification']
+    reply_author = request.vars['reply_author']
+    user = session.user_id
+
+    # Create row
+    db.message_classification.insert(
+        discussion_message = reply_id,
+        classified_by = user,
+        classification = classification)
+
+    # Update reply classification count
+    reply = db(db.discussion_message.id == reply_id).select().first()
+    count = reply.classification_count
+    reply.classification_count = count + 1
+    if count >= CLASSIFICATION_THRESHOLD:
+        reply.classified = True
+        __update_user_stats(reply_author, classification)
+    reply.update_record()
+
+def get_user_stats():
+    user = db(db.user_info.id == session.user_id).select().first()
+    return json.dumps(dict(p_nont=user.p_nont, p_repr=user.p_repr, p_oper=user.p_oper))
+
 def testws():
     __push_notification("notification", "something")
 
+
+def __update_user_stats(user, classification):
+    print('Updating user ' + user)
+    user = db(db.user_info.id == user).select().first()
+
+    # TODO increment based on majority vote rather than the last one
+    # e.g. if 2 people said OPER and 1 said REPR, increment p_oper
+
+    # Define overall classification
+    if classification.startswith('OPER'):
+        user.p_oper = user.p_oper + 1
+    elif classification.startswith('REPR'):
+        user.p_repr = user.p_repr + 1
+    else:
+        user.p_nont = user.p_nont + 1
+    user.update_record()
 
 
 def __push_notification(type, data):

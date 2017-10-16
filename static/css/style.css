@@ -20,12 +20,11 @@ header {
 	position: fixed;
 	width: 100%;
 	padding: 0px 15px;
-	background: #5AA0CE;
+	background: linear-gradient(#EEEFF1, #AAACBB);
 	overflow: auto;
     border-bottom: solid 1px #CCC;
 	z-index: 999;
 	color: white;
-	box-shadow: inset 0 15px 30px rgba(140, 90, 206, 0.7);
 }
 
 input,
@@ -44,7 +43,7 @@ input[type=text] {
 }
 
 header .name {
-	line-height: 30px;
+	line-height: 40px;
 }
 
 a {
@@ -107,8 +106,57 @@ a {
 }
 
 header h2 {
-    margin-left: 0;
+	display: inline-block;
+	margin-left: 0;
+	text-shadow: 0 1px 0 #666;
 }
+
+#stats {
+	display: inline-block;
+	width: 400px;
+	height: 30px;
+	margin-top: 10px; 
+	margin-left: 20px;
+	border-radius: 30px;
+	padding: 0;
+	overflow:hidden;
+	box-shadow: inset 0 0 40px rgba(0,0,0,0.6); 
+	border: solid 1px rgba(255,255,255,0.3);
+	text-align: center;
+	font-size: 10pt;
+}
+
+	#stats:after {
+		content: 'None of your messages have been rated yet';
+		line-height: 30px;
+	}
+
+	#stats > div {
+		color: white;
+		text-align: center;
+		height: 100%;
+		margin: 0;
+		border: 0;
+		padding: 0;
+		float: left;
+		width: 0;
+		transition: width 0.5s;
+	}
+	
+	#p_nont {
+		width: 10%;
+		background: linear-gradient(#FF2D66, #FF5441);
+	}
+
+	#p_repr {
+		width: 40%;
+		background: linear-gradient(#F6F441, #FDFE7C);
+	}
+
+	#p_oper {
+		width: 50%;
+		background: linear-gradient(#02DB1A, #6AE772);
+	}
 
 header .userImage {
     height: 30px;
@@ -248,26 +296,30 @@ h3 {
 .chatMessage {
 	display: inline-block;
 	margin-top: 10px;
-	margin-bottom: 20px;
+	margin-bottom: 10px;
 	background: #CCC;
 	position: relative;
 	padding: 0px;
-	padding-right: 170px;
 	width: 100%;
-	min-height: 120px;
 	box-sizing: border-box;
 	color:black;
 	border-radius:10px;
 	border-color: black;
 }
 
+.notClassified .chatMessage {
+	padding-right: 170px;
+	min-height: 120px;
+}
 
-.chatMessage.notask {
+
+.notask .chatMessage,
+.chatMessage.classified {
 	padding-right: 0;
 	min-height: 1px;
 }
 
-.chatMessage.user {
+.user .chatMessage {
 	background: #ACD8E6;
 }
 
@@ -289,25 +341,27 @@ h3 {
 	bottom: 0;
 	right: 0;
 	width: 150px;
-	background: rgba(0,0,0,0.2);
+	background: rgba(163, 163, 163, 0.9)  
 }
 
 .taskArea > div {
 	position: absolute;
 	bottom: 0px;
+	width: 100%;
 	padding-bottom: 10px;
 	background: linear-gradient(transparent, rgba(156,220,254, 0.3)); 
 }
 
 	.chatMessage .taskArea .choices a {
+		cursor: pointer;
 		display: inline-block;
 		background: rgba(0,0,0,0.3);
-		text-transform: uppercase;
+		text-transform: lowercase;
 		color: white;
 		text-decoration: none;
 		font-weight: bolder;
 		padding: 5px 15px;
-		margin: 0 10px;
+		margin: 0 10px 5px 10px;
 		border-radius: 30px;
 	}
 
@@ -323,7 +377,7 @@ h3 {
 	width: 0;
 }
 
-.chatMessage.user:after {
+.user .chatMessage:after {
 	left: auto;
 	right: 30px;
 	border-color: #ACD8E6 transparent;
@@ -596,3 +650,4 @@ ul.noBullet {
 	.notification p {
 		margin: 0;
 	}
+

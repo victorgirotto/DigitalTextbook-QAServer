@@ -134,7 +134,10 @@ auth.settings.reset_password_requires_verification = True
 db.define_table('user_info',
     Field('name','string'),
     Field('date_added','datetime'),
-    Field('contribution_points', 'integer'))
+    Field('contribution_points', 'integer'),
+    Field('p_nont', 'integer', default=0),
+    Field('p_repr', 'integer', default=0),
+    Field('p_oper', 'integer', default=0))
 
 db.define_table('discussion', 
     Field('title', 'string'),
@@ -150,7 +153,14 @@ db.define_table('discussion_message',
     Field('message_content','string'),
     Field('date_added','datetime'),
     Field('added_by','reference user_info'),
+    Field('classification_count', 'integer', default=0),
+    Field('classified','boolean', default=False),
     Field('badges','list:reference task_definition'))
+
+db.define_table('message_classification',
+    Field('discussion_message', 'reference discussion_message'),
+    Field('classified_by', 'reference user_info'),
+    Field('classification', 'string'))
 
 db.define_table('concept',
     Field('name','string'),

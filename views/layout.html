@@ -13,7 +13,8 @@
             submitNewDiscussion: '{{=URL("default","submit_new_discussion")}}',
             getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}',
             toggleUpvote: '{{=URL("default","toggle_upvote")}}',
-            discussion: '{{=URL("default","discussion")}}'
+            discussion: '{{=URL("default","discussion")}}',
+            getUserStats: '{{=URL("default","get_user_stats")}}'
         },        
         ENV = {};
 
@@ -40,6 +41,29 @@
             })){
                 alert("html5 websocket not supported by your browser, try Google Chrome");
             }
+
+            var updateStats = function(){
+                console.dir('Updating stats...');
+                $.ajax({
+                    method: 'get',
+                    url: URL.getUserStats,
+                    success: function(data){
+                        data = JSON.parse(data);
+                        var p_nont = $('#p_nont');
+                        var p_repr = $('#p_repr');
+                        var p_oper = $('#p_oper');
+
+                        // Set width
+                        var total = data.p_nont + data.p_repr + data.p_oper;
+                        p_nont.width((data.p_nont/parseFloat(total)) * 100 + '%');
+                        p_repr.width((data.p_repr/parseFloat(total)) * 100 + '%');
+                        p_oper.width((data.p_oper/parseFloat(total)) * 100 + '%');
+                    }
+                });
+            };
+            updateStats();
+            // Start loop to update stats
+            window.setInterval(updateStats, 10000);
         });
 
         var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum){
@@ -72,12 +96,17 @@
 <body>
 <header>
 	<h2>
-      <img class="userImage" src="{{=URL('static','images/user.png')}}" alt="">
-      {{=user_name}}
-  </h2>
-  <p class="userStats">
-	  <!-- Contribution points <span>{{=contribution_points}}</span> -->
-	</p>
+        <img class="userImage" src="{{=URL('static','images/user.png')}}" alt="">
+        {{=user_name}}
+    </h2>
+    <div id="stats">
+        <div id="p_nont"></div>
+        <div id="p_repr"></div>
+        <div id="p_oper"></div>
+    </div>
+  <!-- <p class="userStats">
+	  Contribution points <span>{{=contribution_points}}</span>
+	</p> -->
 </header>
 
 <div id="topContainer">
