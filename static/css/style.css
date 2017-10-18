@@ -610,14 +610,15 @@ ul.noBullet {
 	}
 
 #discussionStartBtn {
+	padding: 0;
 	display: block;
 	position: fixed;
 	bottom: 20px;
 	right: 20px;
-	height: 30px;
-	width: 30px;
-	line-height: 30px;
-	border-radius: 30px;
+	height: 60px;
+	width: 60px;
+	line-height: 53px;
+	border-radius: 60px;
 	text-align: center;
 	font-size: 3em;
 	box-shadow: 2px 2px 6px #999;
