@@ -104,7 +104,7 @@
             submitDiscussion();
         });
 
-        $('.questionsList li').click(redirectToDiscussion);
+        $('.questionsList li:not(.pageHeader)').click(redirectToDiscussion);
 
         $('.upvote').click(setupUpvote);
 
@@ -253,7 +253,7 @@
     {{for d in discussions:}}
 
     {{if d.discussion.page_num != last_page:}}
-    <li class="page{{=d.discussion.page_num}}"><h2>Page {{=d.discussion.page_num}}</h2></li>
+    <li class="page{{=d.discussion.page_num}} pageHeader"><h2>Page {{=d.discussion.page_num}}</h2></li>
     {{pass}}
     {{last_page = d.discussion.page_num}}
 	<li class="page{{=d.discussion.page_num}}" data-id="{{=d.discussion.id}}">
