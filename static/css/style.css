@@ -113,7 +113,7 @@ header h2 {
 
 #stats {
 	display: inline-block;
-	width: 250px;
+	width: 330px;
 	height: 20px;
 	margin-top: 10px; 
 	margin-left: 20px;
@@ -143,18 +143,19 @@ header h2 {
 		transition: width 0.5s;
 	}
 	
-	#p_nont {
-		width: 10%;
+	#p_nont,
+	.p_nont {
 		background: linear-gradient(#FF2D66, #FF5441);
+		color: white;
 	}
 
-	#p_repr {
-		width: 40%;
+	#p_repr,
+	.p_repr {
 		background: linear-gradient(#F6F441, #FDFE7C);
 	}
 
-	#p_oper {
-		width: 50%;
+	#p_oper,
+	.p_oper {
 		background: linear-gradient(#02DB1A, #6AE772);
 	}
 

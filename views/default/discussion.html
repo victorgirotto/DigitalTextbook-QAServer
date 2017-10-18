@@ -179,21 +179,6 @@
 			return obj;
 		};
 
-		var openOverlay = function(id, setupFunction){
-			var overlay = $('#overlay');
-			$(id, overlay).show();
-			overlay.fadeIn('slow');
-			if(setupFunction){
-				setupFunction();
-			}
-		}
-
-		function closeOverlay(){
-			var overlay = $('#overlay');
-			overlay.fadeOut('slow');
-			$('.popup').fadeOut('slow');
-		}
-
 		$(function(){
 			$('.close').click(function(){
 				closeOverlay();
@@ -210,6 +195,7 @@
 			$('#replyButton').click(submitReply);
 			$('#replyBox').keydown(function(e){
 				if(e.keyCode === 13){
+					e.preventDefault();
 					submitReply();
 				}
 			});
@@ -326,8 +312,9 @@
 	</a>
 </div>
 
-<div id="overlay">
-    <div id="taskPopup" class="popup">
+{{block overlay}}
+
+	<div id="taskPopup" class="popup">
 		<div class="close">
 			<img src="{{=URL('static','images/close.png')}}" alt="">
 		</div>
@@ -346,4 +333,4 @@
 		<h2></h2>
 		<ul class="badgeContent"></ul>
 	</div>
-</div>
+{{end}}

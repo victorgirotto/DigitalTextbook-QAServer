@@ -58,12 +58,25 @@
                         p_nont.width((data.p_nont/parseFloat(total)) * 100 + '%');
                         p_repr.width((data.p_repr/parseFloat(total)) * 100 + '%');
                         p_oper.width((data.p_oper/parseFloat(total)) * 100 + '%');
+
+                        // Update in help dialogue
+                        $('#p_nont_number').text(data.p_nont);
+                        $('#p_repr_number').text(data.p_repr);
+                        $('#p_oper_number').text(data.p_oper);
                     }
                 });
             };
             updateStats();
             // Start loop to update stats
             window.setInterval(updateStats, 10000);
+
+            // Set click event
+            $('#stats').click(function(){
+                openOverlay('#statsExplanation', function(){
+                    var statsClone = $('#stats').clone();
+                    $('#statsClone').html(statsClone);
+                })
+            });
         });
 
         var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum){
@@ -89,6 +102,22 @@
                 notification.hide('fast');
             }, 7000)
         }
+
+        var openOverlay = function(id, setupFunction){
+			var overlay = $('#overlay');
+			$(id, overlay).show();
+			overlay.fadeIn('slow');
+			if(setupFunction){
+				setupFunction();
+			}
+		}
+
+		function closeOverlay(){
+			var overlay = $('#overlay');
+			overlay.fadeOut('slow');
+			$('.popup').fadeOut('slow');
+		}
+
     </script>
     {{block header_script}}
     {{end}}
@@ -116,6 +145,54 @@
 <div id="notificationPanel">
 </div>
 
+</div>
+
+<div id="overlay">
+    <div id="statsExplanation" class="popup">
+        <div class="close">
+            <img src="{{=URL('static','images/close.png')}}" alt="">
+        </div>
+
+        <h2>Discussion stats</h2>
+
+        <div id="statsClone"></div>
+
+        <p>
+            These statistics show how well you've participated in the discussion. 
+            Each reply you make in a discussion can be classified in one of three types, represented by a color.
+            Here's what each type means:
+        </p>
+
+        <p>
+            <strong class="p_nont">Isolated</strong>: 
+            these are replies that do not take into consideration what other have said. <br/>
+
+            (You have made <span id="p_nont_number">5</span> isolated replies)
+        </p>
+        <p>
+            <strong class="p_repr">Attentive</strong>: 
+            these are replies that acknowledge what others have said, but does not add more information.<br/>
+            (You have made <span id="p_repr_number">5</span> isolated replies)
+        </p>
+        <p>
+            <strong class="p_oper">Creative</strong>: 
+            these are replies that not only acknowledge what others have said, but also adds new information.
+            what others said, but adds new information<br/>
+            (You have made <span id="p_oper_number">5</span> isolated replies)
+        </p>
+        </ul>
+
+        <p>
+                <img src="{{=URL('static','images/task.png')}}" alt="" style="float:right"/>
+            We categorized them based on feedback from your peers on each individual message. 
+            This feedback comes by answering these questions in each message.</p>
+
+        
+
+    </div>
+
+    {{block overlay}}
+    {{end}}
 </div>
 
 </body>

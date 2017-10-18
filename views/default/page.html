@@ -19,7 +19,9 @@
         // Open notification
         openGeneralNotification(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum);
         // Add discussion
-        addDiscussion(text, user, timestamp, discussionId, parseInt(pageNum));
+        if(type === 'discussion'){
+            addDiscussion(text, user, timestamp, discussionId, parseInt(pageNum));
+        }
     };
 
     $(function(){
@@ -202,21 +204,6 @@
         window.location.href = "{{=URL('default','discussion')}}?id=" + id;
     }
 
-    function openOverlay(id, setupFunction){
-        var overlay = $('#overlay');
-        overlay.fadeIn('slow');
-        $(id, overlay).fadeIn('slow');
-        if(setupFunction){
-            setupFunction();
-        }
-    }
-
-    function closeOverlay(){
-        var overlay = $('#overlay');
-        overlay.fadeOut('slow');
-        $('.popup').fadeOut('slow');
-    }
-
     function submitDiscussion(){
         // Get data
         var popup = $('#addDiscussionPopup');
@@ -290,7 +277,7 @@
 </div>
 {{pass}}
 
-<div id="overlay">
+{{block overlay}}
     <div id="tagDiscussionsPopup" class="popup">
         <div class="close">
             <img src="{{=URL('static','images/close.png')}}" alt="">
@@ -307,7 +294,7 @@
             <img src="{{=URL('static','images/close.png')}}" alt="">
         </div>
 
-        <h2>Add a new discussion</h2>
+        <h2>Add a new discussion on page {{=page_num}}</h2>
 
         <p>
             <h3>Title</h3>
@@ -339,4 +326,4 @@
         <a href="#" class="button submit">Submit discussion</a>
     </div>
 
-</div>
+{{end}}

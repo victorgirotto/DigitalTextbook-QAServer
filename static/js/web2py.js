@@ -182,12 +182,14 @@
                     /[^0-9\-\.,]|[\-](?=.)|[\.,](?=[0-9]*[\.,])/g, '').reverse();
                 if (this.value != nvalue) this.value = nvalue;
             });
+            var w2p_ajax_confirm_message;
             var confirm_message = !web2py.isUndefined(w2p_ajax_confirm_message) ? w2p_ajax_confirm_message :
                 'Are you sure you want to delete this object?';
             doc.on('click', 'input[type="checkbox"].delete', function () {
                 if (this.checked)
                     if (!web2py.confirm(confirm_message)) this.checked = false;
             });
+            var w2p_ajax_datetime_format;
             var datetime_format = !web2py.isUndefined(w2p_ajax_datetime_format) ? w2p_ajax_datetime_format :
                 '%Y-%m-%d %H:%M:%S';
             doc.on('click', 'input.datetime', function () {
@@ -206,6 +208,7 @@
                     $(this).trigger('click');
                 }
             });
+            var w2p_ajax_date_format;
             var date_format = !web2py.isUndefined(w2p_ajax_date_format) ? w2p_ajax_date_format : '%Y-%m-%d';
             doc.on('click', 'input.date', function () {
                 var tformat = $(this).data('w2p_date_format');
