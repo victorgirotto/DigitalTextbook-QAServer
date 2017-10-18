@@ -25,6 +25,27 @@
 			}
 		};
 
+		var submitReply = function(){
+			var text = $('#replyBox').val();
+			if(text){
+				$.ajax({
+					method: 'POST',
+					url: URL.submitReply,
+					data: {
+						message: text,
+						discussion_id: ENV.discussionId
+					},
+					success: function(data){
+						var reply = JSON.parse(data);
+						addBuble(reply.id, reply.message, reply.timestamp, reply.user_name, true);
+					}
+				});
+			}
+			// Clear reply box
+			$('#replyBox').val('');
+			return false;
+		};
+
 		var addBuble = function(id, message, timestamp, userName, isCurrentUserMessage){
 			// Create bubble in memory.
 			// Note: this is not a good practice. Ideally we'd use some sort of template engine, e.g. Mustache. But this is faster right now.
@@ -186,26 +207,13 @@
 				window.location.href = "{{=URL('default','page')}}?page_num={{=page_num}}";
 			});
 
-			$('#replyButton').click(function(){
-				var text = $('#replyBox').val();
-				if(text){
-					$.ajax({
-						method: 'POST',
-						url: URL.submitReply,
-						data: {
-							message: text,
-							discussion_id: ENV.discussionId
-						},
-						success: function(data){
-							var reply = JSON.parse(data);
-							addBuble(reply.id, reply.message, reply.timestamp, reply.user_name, true);
-						}
-					});
+			$('#replyButton').click(submitReply);
+			$('#replyBox').keydown(function(e){
+				if(e.keyCode === 13){
+					submitReply();
 				}
-				// Clear reply box
-				$('#replyBox').val('');
-				return false;
 			});
+
 
 			// Add tasks to the messages that need it
 			var replies = $('.notClassified').filter('.nonUser'); // get all not classified non-user messages
