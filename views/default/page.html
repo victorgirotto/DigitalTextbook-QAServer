@@ -110,6 +110,8 @@
 
         // Navigate to anchor
         window.location = "#page" + ENV.pageNum;
+        $('#page' + ENV.pageNum).addClass('glow');
+        window.setTimeout(function(){ $('#page' + ENV.pageNum).removeClass('glow'); }, 3000);
     });
 
     var setupUpvote = function(e){
@@ -253,7 +255,7 @@
     {{for d in discussions:}}
 
     {{if d.discussion.page_num != last_page:}}
-    <li class="page{{=d.discussion.page_num}} pageHeader"><h2>Page {{=d.discussion.page_num}}</h2></li>
+    <li class="page{{=d.discussion.page_num}} pageHeader" id="page{{=d.discussion.page_num}}"><h2>Page {{=d.discussion.page_num}}</h2></li>
     {{pass}}
     {{last_page = d.discussion.page_num}}
 	<li class="page{{=d.discussion.page_num}}" data-id="{{=d.discussion.id}}">

@@ -653,3 +653,12 @@ ul.noBullet {
 		margin: 0;
 	}
 
+@keyframes glow {
+	to {
+		text-shadow: 0 0 10px #007ACC;
+	}
+}
+
+.glow {
+	animation: glow .5s infinite alternate;
+}
