@@ -15,13 +15,13 @@
 		// Copy general function
 		var openGeneralNotification = openNotification;
 		// Override openNotification function
-		var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp){
+		var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum, replyId, userId){
 			if(ENV.discussionId == discussionId){ // TODO check if the notification is on this thread
 				// New message in this thread
-				addBuble(0, text, timestamp, user, user === '{{=user_name}}');
+				addBuble(replyId, text, timestamp, user, user === '{{=user_name}}', userId);
 			} else {
 				// New message is in another thread. Open general notification
-				openGeneralNotification(type, user, text, link, discussionId, discussionTitle, timestamp);
+				openGeneralNotification(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum, replyId, userId);
 			}
 		};
 
@@ -46,7 +46,7 @@
 			return false;
 		};
 
-		var addBuble = function(id, message, timestamp, userName, isCurrentUserMessage){
+		var addBuble = function(id, message, timestamp, userName, isCurrentUserMessage, userId){
 			// Create bubble in memory.
 			// Note: this is not a good practice. Ideally we'd use some sort of template engine, e.g. Mustache. But this is faster right now.
 			var userPostfix = isCurrentUserMessage ? ' user' : '';
@@ -54,7 +54,9 @@
 			var hasTaskClass = isCurrentUserMessage ? 'notask user' : 'task nonUser';
 			var container = $('#chatHistory');
 			var chatPanel = $('<div></div>').attr({
-				class: 'chatPanel notClassified '  + userPostfix + ' ' + hasTaskClass
+				class: 'chatPanel notClassified '  + userPostfix + ' ' + hasTaskClass,
+				'data-id': id,
+				'data-user': userId
 			});
 			
 			var innerContainer = $('<div></div>').attr({

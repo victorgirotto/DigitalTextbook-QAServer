@@ -36,7 +36,9 @@
                         response.data.id,
                         response.data.title,
                         response.data.timestamp,
-                        response.data.page);
+                        response.data.page,
+                        response.data.replyId,
+                        response.data.userId);
                 }
             })){
                 alert("html5 websocket not supported by your browser, try Google Chrome");
@@ -79,7 +81,7 @@
             });
         });
 
-        var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum){
+        var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum, replyId){
             var panel = $('#notificationPanel');
             var notification = $('<div class="notification"></div>');
             var headerStr = 'New ' + type +' by ' + user;

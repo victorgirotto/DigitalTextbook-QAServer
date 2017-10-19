@@ -221,8 +221,10 @@ def submit_discussion_reply():
     __push_notification('notification', dict(
         event=EVENTS['new_comment'], 
         user=session.user_name, 
+        userId=session.user_id,
         title=title,
         id=discussion_id,
+        replyId=reply_id,
         body=message,
         timestamp=str(date_added)))
     

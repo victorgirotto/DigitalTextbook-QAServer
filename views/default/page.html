@@ -15,9 +15,9 @@
     // Copy general function
     var openGeneralNotification = openNotification;
     // Override openNotification function
-    var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum){
+    var openNotification = function(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum, replyId, userId){
         // Open notification
-        openGeneralNotification(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum);
+        openGeneralNotification(type, user, text, link, discussionId, discussionTitle, timestamp, pageNum, replyId, userId);
         // Add discussion
         if(type === 'discussion'){
             addDiscussion(text, user, timestamp, discussionId, parseInt(pageNum));
