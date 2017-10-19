@@ -165,7 +165,7 @@ def discussion():
     # Retrieve discussion messages
     discussion_messages = db(
         (db.discussion_message.discussion == id) & 
-        (db.discussion_message.added_by == db.user_info.id)).select()
+        (db.discussion_message.added_by == db.user_info.id)).select(orderby=db.discussion_message.date_added)
     # Retrieve discussion
     discussion = db((db.discussion.id == id)).select().first()
     current_user_id = session.user_id
