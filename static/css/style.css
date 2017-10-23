@@ -143,6 +143,13 @@ header h2 {
 		transition: width 0.5s;
 	}
 	
+	strong.p_nont,
+	strong.p_repr,
+	strong.p_oper {
+		padding: 0 5px;
+		border-radius: 5px;
+	}
+
 	#p_nont,
 	.p_nont {
 		background: linear-gradient(#FF2D66, #FF5441);

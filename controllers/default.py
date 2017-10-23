@@ -17,6 +17,7 @@ EVENTS = dict(
 
 def login():
     username = request.vars['username']
+    new_user = False
     if not username:
         # First loading the page
         return dict()
@@ -32,6 +33,7 @@ def login():
                 date_added = datetime.now(),
                 contribution_points = 0
             )
+            new_user = True
         else:
             # user exists
             user_id = user.id
@@ -40,6 +42,8 @@ def login():
         session.user_id = user_id
         session.user_name = username
         session.contribution_points = contribution_points
+        # log
+        __log('login', dict(new_user=new_user))
         # Redirect to page
         redirect(URL(request.application, 'default', 'page?page_num=1'))
 
@@ -60,6 +64,8 @@ def page():
     # Retrieve user upvotes
     upvotes = db(db.upvote.user_info == session.user_id).select(db.upvote.discussion)
     upvotes = [d.discussion for d in upvotes]
+    # log
+    __log('load_page', dict(page_num=page_num))
     # Return values
     return dict(
         page_num=page_num, 
@@ -83,11 +89,15 @@ def toggle_upvote():
         db((db.upvote.discussion == discussion_id) & (db.upvote.user_info == user_id)).delete()
         discussion.upvotes = discussion.upvotes - 1
         discussion.update_record()
+        # log
+        __log('remove_upvote', dict(discussion=discussion_id))
     else:
         # User is upvoting
         db.upvote.insert(discussion=discussion_id, user_info=user_id)
         discussion.upvotes = discussion.upvotes + 1
         discussion.update_record()
+        # log
+        __log('add_upvote', dict(discussion=discussion_id))
     return True
 
 def submit_new_discussion():
@@ -137,6 +147,8 @@ def submit_new_discussion():
         id=discussion_id,
         page=page_num,
         timestamp=str(date_added)))
+    # Log
+    __log('add_discussion', dict(page_num=page_num, discussion_id=discussion_id))
     return json.dumps(discussion_id)
 
 def get_discussions_for_tag():
@@ -189,6 +201,8 @@ def discussion():
     cl_msg = set()
     for cm in classified_messages:
         cl_msg.add(cm.discussion_message)
+    # log
+    __log('load_discussion', dict(page_num=discussion.page_num, discussion_id=id))
     # return
     return dict(
         discussion_id=id, 
@@ -216,7 +230,9 @@ def submit_discussion_reply():
         added_by = user_id
     )
     # Get discussion title
-    title = db(db.discussion.id == discussion_id).select(db.discussion.title).first().title
+    discussion = db(db.discussion.id == discussion_id).select(db.discussion.title, db.discussion.page_num).first()
+    title = discussion.title
+    page_num = discussion.page_num
     # Send notification
     __push_notification('notification', dict(
         event=EVENTS['new_comment'], 
@@ -227,7 +243,8 @@ def submit_discussion_reply():
         replyId=reply_id,
         body=message,
         timestamp=str(date_added)))
-    
+    # log
+    __log('reply', dict(discussion_id=discussion_id, reply_id=reply_id, page_num=page_num))
     return json.dumps(dict(
         id = reply_id,
         message = message,
@@ -296,6 +313,9 @@ def classify_reply():
     reply = db(db.discussion_message.id == reply_id).select().first()
     count = reply.classification_count + 1
     reply.classification_count = count
+
+    __log('classify_reply', dict(reply_id=reply_id, classification=classification, resulting_class_count=count))
+
     if count >= CLASSIFICATION_THRESHOLD:
         reply.classified = True
         classifications = db(db.message_classification.discussion_message == reply_id).select(db.message_classification.classification)
@@ -310,6 +330,21 @@ def get_user_stats():
 def testws():
     __push_notification("notification", "something")
 
+def log_help():
+    ''' Logs when the help was opened or closed '''
+    status = request.vars['status'] # open or closed
+    __log('toggle_help', dict(status=status))
+
+
+
+### PRIVATE FUNCTIONS ###a
+
+def __log(action, info=dict()):
+    db.log.insert(
+        user=session.user_id,
+        action=action,
+        info=json.dumps(info)
+    )
 
 def __update_user_stats(user, classifications):
     print('Updating user ' + user)
@@ -329,8 +364,9 @@ def __update_user_stats(user, classifications):
         user.p_repr = user.p_repr + 1
     else:
         user.p_nont = user.p_nont + 1
+    #log
+    __log('update_user_stats', dict(user=user.id, p_oper=user.p_oper, p_repr=user.p_repr, p_nont=user.p_nont))
     user.update_record()
-
 
 def __push_notification(type, data):
     websocket_send(

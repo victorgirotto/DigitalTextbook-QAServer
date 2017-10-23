@@ -90,16 +90,6 @@
                 });
         });
 
-        $('.close').click(function(){
-            closeOverlay();
-        });
-
-        $('#overlay').click(function(e){
-            if($(e.target).is('#overlay')){
-                closeOverlay();
-            }
-        });
-
         $('#addDiscussionPopup .submit').click(function(){
             submitDiscussion();
         });

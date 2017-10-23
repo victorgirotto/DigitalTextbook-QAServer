@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 
 # -------------------------------------------------------------------------
 # This scaffolding model makes your app work on Google App Engine too
@@ -31,7 +32,7 @@ if not request.env.web2py_runtime_gae:
     db = DAL(myconf.get('db.uri'),
              pool_size=myconf.get('db.pool_size'),
              migrate_enabled=myconf.get('db.migrate'),
-             check_reserved=['all'])
+             check_reserved=['mysql'])
 else:
     # ---------------------------------------------------------------------
     # connect to Google BigTable (optional 'google:datastore://namespace')
@@ -195,3 +196,8 @@ db.define_table('task',
     Field('user_input', 'list:string'),
     Field('completed_by', 'reference user_info'))
 
+db.define_table('log',
+    Field('timestamp', 'datetime', default=lambda:datetime.now()),
+    Field('user', 'reference user_info'),
+    Field('action', 'string'),
+    Field('info', 'string'))

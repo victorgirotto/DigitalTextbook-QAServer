@@ -14,7 +14,8 @@
             getDiscussionsForTag: '{{=URL("default","get_discussions_for_tag")}}',
             toggleUpvote: '{{=URL("default","toggle_upvote")}}',
             discussion: '{{=URL("default","discussion")}}',
-            getUserStats: '{{=URL("default","get_user_stats")}}'
+            getUserStats: '{{=URL("default","get_user_stats")}}',
+            logHelp: '{{=URL("default","log_help")}}'
         },        
         ENV = {};
 
@@ -22,23 +23,25 @@
             $(".userStats").click(function(){
                 alert('This shows how many contribution points you have! To increase this number, you can:' +
                 '\n1) Create new discussions\n2) Evaluate other people\'s responses to a discussions');
-            })
+            });
 
             // Connect to websocket
             if(!$.web2py.web2py_websocket('ws://192.168.0.18:8888/realtime/mygroup', function(e){
-                var response = JSON.parse(e.data);
-                if (response.data.user !== '{{=user_name}}'){
-                    openNotification(
-                        response.data.event, 
-                        response.data.user, 
-                        response.data.body, 
-                        URL.discussion + '?id=' + response.data.id, 
-                        response.data.id,
-                        response.data.title,
-                        response.data.timestamp,
-                        response.data.page,
-                        response.data.replyId,
-                        response.data.userId);
+                if(!(e.data.startsWith('+') || e.data.startsWith('-'))){
+                    var response = JSON.parse(e.data);
+                    if (response.data.user !== '{{=user_name}}'){
+                        openNotification(
+                            response.data.event, 
+                            response.data.user, 
+                            response.data.body, 
+                            URL.discussion + '?id=' + response.data.id, 
+                            response.data.id,
+                            response.data.title,
+                            response.data.timestamp,
+                            response.data.page,
+                            response.data.replyId,
+                            response.data.userId);
+                    }
                 }
             })){
                 alert("html5 websocket not supported by your browser, try Google Chrome");
@@ -77,7 +80,28 @@
                 openOverlay('#statsExplanation', function(){
                     var statsClone = $('#stats').clone();
                     $('#statsClone').html(statsClone);
+                    $.ajax({
+                        method:'get',
+                        url: URL.logHelp,
+                        data: {status:'open'}
+                    });
+                }, function(){
+                    $.ajax({
+                        method:'get',
+                        url: URL.logHelp,
+                        data: {status:'close'}
+                    });
                 })
+            });
+
+            $('.close').click(function(){
+                closeOverlay();
+            });
+
+            $('#overlay').click(function(e){
+                if($(e.target).is('#overlay')){
+                    closeOverlay();
+                }
             });
         });
 
@@ -105,13 +129,19 @@
             }, 7000)
         }
 
-        var openOverlay = function(id, setupFunction){
+        var openOverlay = function(id, setupFunction, closeFunction){
 			var overlay = $('#overlay');
 			$(id, overlay).show();
 			overlay.fadeIn('slow');
 			if(setupFunction){
 				setupFunction();
 			}
+            if(closeFunction){
+                $('.close', $(id)).click(function(){
+                    closeOverlay();
+                    closeFunction();
+                })
+            }
 		}
 
 		function closeOverlay(){
