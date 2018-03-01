@@ -148,6 +148,7 @@ var CLASSIFICATION = function(){
             },
             success: function(data){
                 closeTask(taskArea);
+                updateContributionPoints(data);
             },
             error: function(){
                 alert('something went wrong');

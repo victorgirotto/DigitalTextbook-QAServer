@@ -7,13 +7,18 @@ from datetime import datetime
 from gluon.contrib.websocket_messaging import websocket_send
 from collections import defaultdict
 
-ADD_DISCUSSION_POINTS = 15
-CLASSIFICATION_THRESHOLD = 3
+ADD_DISCUSSION_POINTS = 1
+ADD_REPLY_POINTS = 3
+SUBMIT_TASK_POINTS = 5
+
+CLASSIFICATION_THRESHOLD = 1
 
 EVENTS = dict(
     new_discussion="discussion",
     new_comment="comment"
 )
+
+TASKS = True # True or False
 
 def login():
     username = request.vars['username']
@@ -73,7 +78,8 @@ def page():
         concepts=concepts, 
         user_name=session.user_name, 
         user_upvotes = upvotes,
-        contribution_points=session.contribution_points)
+        contribution_points=session.contribution_points,
+        tasks_condition=TASKS)
 
 def toggle_upvote():
     user_id = session.user_id
@@ -214,7 +220,8 @@ def discussion():
         contribution_points=session.contribution_points, 
         page_num=discussion.page_num,
         completed_tasks=ct_dict,
-        classified_messages=cl_msg)
+        classified_messages=cl_msg,
+        tasks_condition=TASKS)
 
 def submit_discussion_reply():
     # get vars
@@ -243,13 +250,16 @@ def submit_discussion_reply():
         replyId=reply_id,
         body=message,
         timestamp=str(date_added)))
+    # Update points
+    new_cp = __increment_contribution_points(user_id, ADD_REPLY_POINTS)
     # log
     __log('reply', dict(discussion_id=discussion_id, reply_id=reply_id, page_num=page_num))
     return json.dumps(dict(
         id = reply_id,
         message = message,
         timestamp = str(date_added),
-        user_name = reply_id # TODO Should fetch username
+        user_name = reply_id, # TODO Should fetch username
+        contribution_points = new_cp
     ))
 
 def submit_task():
@@ -265,9 +275,8 @@ def submit_task():
         user_input=user_input,
         completed_by=completed_by)
     # update points for user
-    user = db(db.user_info.id == completed_by).select().first()
-    user.contribution_points = user.contribution_points + points
-    user.update_record()
+    __increment_contribution_points(completed_by, SUBMIT_TASK_POINTS)
+    print('Incrementing CP by ' + str(SUBMIT_TASK_POINTS))
     # Update in session
     session.contribution_points = user.contribution_points
     # Check if threshold is exceeded
@@ -323,6 +332,10 @@ def classify_reply():
         __update_user_stats(reply_author, classifications)
     reply.update_record()
 
+    # Update contribution points for user who submitted it
+    new_cp = __increment_contribution_points(user, SUBMIT_TASK_POINTS)
+    return new_cp
+
 def get_user_stats():
     user = db(db.user_info.id == session.user_id).select().first()
     return json.dumps(dict(p_nont=user.p_nont, p_repr=user.p_repr, p_oper=user.p_oper))
@@ -367,6 +380,14 @@ def __update_user_stats(user, classifications):
     #log
     __log('update_user_stats', dict(user=user.id, p_oper=user.p_oper, p_repr=user.p_repr, p_nont=user.p_nont))
     user.update_record()
+
+def __increment_contribution_points(user_id, points):
+    user = db(db.user_info.id == user_id).select().first()
+    new_points = user.contribution_points + points
+    user.contribution_points = new_points
+    user.update_record()
+    session.contribution_points = new_points
+    return new_points
 
 def __push_notification(type, data):
     websocket_send(

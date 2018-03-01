@@ -17,16 +17,18 @@
             getUserStats: '{{=URL("default","get_user_stats")}}',
             logHelp: '{{=URL("default","log_help")}}'
         },        
-        ENV = {};
+        ENV = {
+            tasksCondition: '{{=tasks_condition}}' == 'True'
+        };
 
         $(function(){
             $(".userStats").click(function(){
-                alert('This shows how many contribution points you have! To increase this number, you can:' +
-                '\n1) Create new discussions\n2) Evaluate other people\'s responses to a discussions');
+                openOverlay('#cpExplanation', function(){
+                });
             });
 
             // Connect to websocket
-            if(!$.web2py.web2py_websocket('ws://192.168.0.18:8888/realtime/mygroup', function(e){
+            if(!$.web2py.web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup', function(e){
                 if(!(e.data.startsWith('+') || e.data.startsWith('-'))){
                     var response = JSON.parse(e.data);
                     if (response.data.user !== '{{=user_name}}'){
@@ -148,7 +150,11 @@
 			var overlay = $('#overlay');
 			overlay.fadeOut('slow');
 			$('.popup').fadeOut('slow');
-		}
+        }
+        
+		var updateContributionPoints = function(value){
+			$('.userStats span').text(value);
+		};
 
     </script>
     {{block header_script}}
@@ -160,14 +166,16 @@
         <img class="userImage" src="{{=URL('static','images/user.png')}}" alt="">
         {{=user_name}}
     </h2>
-    <div id="stats">
-        <div id="p_nont"></div>
-        <div id="p_repr"></div>
-        <div id="p_oper"></div>
-    </div>
-  <!-- <p class="userStats">
-	  Contribution points <span>{{=contribution_points}}</span>
-	</p> -->
+    {{if tasks_condition:}}
+        <div id="stats">
+            <div id="p_nont"></div>
+            <div id="p_repr"></div>
+            <div id="p_oper"></div>
+        </div>
+    {{pass}}
+    <p class="userStats">
+	    Contribution points <span>{{=contribution_points}}</span>
+    </p>
 </header>
 
 <div id="topContainer">
@@ -180,6 +188,23 @@
 </div>
 
 <div id="overlay">
+
+    <div id="cpExplanation" class="popup">
+        <div class="close">
+            <img src="{{=URL('static','images/close.png')}}" alt="">
+        </div>
+
+        <h2>Contribution Points</h2>
+        
+        <p>The contribution points show how active you are in the discussions. You can increase your points by:</p>
+        <ul>
+            <li>Posting a reply (3 points)</li>
+            {{if tasks_condition:}}
+                <li>Answering the questions about a reply (5 points)</li>
+            {{pass}}
+        </ul>
+    </div>
+
     <div id="statsExplanation" class="popup">
         <div class="close">
             <img src="{{=URL('static','images/close.png')}}" alt="">

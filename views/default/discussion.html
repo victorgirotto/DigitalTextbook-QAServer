@@ -38,6 +38,7 @@
 					success: function(data){
 						var reply = JSON.parse(data);
 						addBuble(reply.id, reply.message, reply.timestamp, reply.user_name, true);
+						updateContributionPoints(reply.contribution_points);
 					}
 				});
 			}
@@ -75,7 +76,7 @@
 			}
 			// Add to DOM
 			chatPanel.hide();
-			if(hasTask){
+			if(hasTask && ENV.tasksCondition){
 				CLASSIFICATION.addTask(chatPanel);
 			}
 			innerContainer.append(chatMessage);
@@ -201,9 +202,11 @@
 
 
 			// Add tasks to the messages that need it
-			var replies = $('.notClassified').filter('.nonUser'); // get all not classified non-user messages
-			for(var i = 0; i < replies.length; i++){
-				CLASSIFICATION.addTask(replies[i]);
+			if(ENV.tasksCondition){
+				var replies = $('.notClassified').filter('.nonUser'); // get all not classified non-user messages
+				for(var i = 0; i < replies.length; i++){
+					CLASSIFICATION.addTask(replies[i]);
+				}
 			}
 		});
 	</script>
